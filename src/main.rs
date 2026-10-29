@@ -13,7 +13,7 @@ struct StatusFormatError;
 
 impl fmt::Display for StatusFormatError {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "Invalid format for status file");
+    write!(f, "Invalid format for status file")?;
     Ok(())
   }
 }
@@ -66,6 +66,7 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
 }
 
 fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
+  read_prior_status(status_storage_file_path)?;
   Ok(())
 }
 
