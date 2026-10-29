@@ -54,6 +54,18 @@ impl fmt::Display for ArgDecodeError {
 
 impl Error for ArgDecodeError {}
 
+#[derive(Debug, Clone)]
+struct ParamsNotSpecifiedError;
+
+impl fmt::Display for ParamsNotSpecifiedError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Status file not present but drive wiping parameters not specified")?;
+    Ok(())
+  }
+}
+
+impl Error for ParamsNotSpecifiedError {}
+
 struct WipeParams {
   drive: String,
   chunk_size: u64,
@@ -157,11 +169,16 @@ fn write_prior_status(status: WipeStatus, status_storage_file_path: String) -> R
   }
 }
 
-fn wipe_drive(params: Option<WipeParams>, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
+fn wipe_drive(params_opt: Option<WipeParams>, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
   let mut status = match read_prior_status(status_storage_file_path)? {
     Some(status) => status,
-    None => WipeStatus::from(params),
+    None => match params_opt {
+      Some(params) => WipeStatus::from(params),
+      None => return Err(Box::new(ParamsNotSpecifiedError)),
+    },
   };
+  
+  todo!();
   
   Ok(())
 }
