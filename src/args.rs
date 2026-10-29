@@ -1,5 +1,7 @@
 use std::env::ArgsOs;
 
+use crate::errors::ArgDecodeError;
+
 pub(crate) fn decode_prgm_args(prgm_args: ArgsOs) -> Result<Vec<String>, ArgDecodeError> {
   // https://doc.rust-lang.org/std/result/enum.Result.html#method.from_iter
   

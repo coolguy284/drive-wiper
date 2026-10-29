@@ -1,17 +1,17 @@
 pub(crate) struct WipeParams {
-  drive: String,
-  chunk_size: u64,
+  pub(crate) drive: String,
+  pub(crate) chunk_size: u64,
 }
 
 pub(crate) struct WipeStartingParams {
-  params: WipeParams,
-  start_chunk_index: u64,
+  pub(crate) params: WipeParams,
+  pub(crate) start_chunk_index: u64,
 }
 
 pub(crate) struct WipeStatus {
-  params: WipeParams,
-  chunk_index: u64,
-  finished: bool,
+  pub(crate) params: WipeParams,
+  pub(crate) chunk_index: u64,
+  pub(crate) finished: bool,
 }
 
 impl From<WipeParams> for WipeStatus {

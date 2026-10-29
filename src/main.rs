@@ -1,6 +1,11 @@
 use std::env::args_os;
 use std::error::Error;
 
+use crate::args::decode_prgm_args;
+use crate::errors::ParamsNotSpecifiedError;
+use crate::io::read_prior_status;
+use crate::structs::{WipeParams, WipeStartingParams, WipeStatus};
+
 mod args;
 mod consts;
 mod errors;

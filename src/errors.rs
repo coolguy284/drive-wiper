@@ -1,3 +1,6 @@
+use std::error::Error;
+use std::fmt;
+
 #[derive(Debug, Clone)]
 pub(crate) struct StatusFormatError;
 
@@ -12,8 +15,8 @@ impl Error for StatusFormatError {}
 
 #[derive(Debug, Clone)]
 pub(crate) struct StatusVersionError {
-  expected_ver: u64,
-  actual_ver: u64,
+  pub(crate) expected_ver: u64,
+  pub(crate) actual_ver: u64,
 }
 
 impl fmt::Display for StatusVersionError {
@@ -27,7 +30,7 @@ impl Error for StatusVersionError {}
 
 #[derive(Debug, Clone)]
 pub(crate) struct ArgDecodeError {
-  arg_index: usize,
+  pub(crate) arg_index: usize,
 }
 
 impl fmt::Display for ArgDecodeError {
