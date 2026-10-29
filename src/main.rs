@@ -1,6 +1,7 @@
 use core::fmt;
-use std::env::args;
+use std::env::{ArgsOs, args, args_os};
 use std::error::Error;
+use std::ffi::OsString;
 use std::fs::read;
 use std::io::ErrorKind;
 use std::str::from_utf8;
@@ -19,6 +20,20 @@ impl fmt::Display for StatusFormatError {
 }
 
 impl Error for StatusFormatError {}
+
+#[derive(Debug, Clone)]
+struct ArgDecodeError {
+  arg_index: usize,
+}
+
+impl fmt::Display for ArgDecodeError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Unable to decode argument with index {}", self.arg_index)?;
+    Ok(())
+  }
+}
+
+impl Error for ArgDecodeError {}
 
 struct WipeStatus {
   drive: String,
@@ -74,9 +89,18 @@ fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box
   Ok(())
 }
 
+fn decode_prgm_args(prgm_args: ArgsOs) -> Result<Vec<String>, ArgDecodeError> {
+  return prgm_args
+    .enumerate()
+    .map(|(index, os_str)| match os_str.into_string() {
+      String(str) => str,
+      OsString(_) => return ArgDecodeError { arg_index: index },
+    })
+    .collect::<Vec<String>>();
+}
+
 fn main() {
-  // TODO: args might panic if arguments are not valid unicode or smth, do a manual parse instead to make it a result
-  let prgm_args = args().collect::<Vec<String>>();
+  let prgm_args = decode_prgm_args(args_os());
   
   if prgm_args.len() != 3 {
     println!("Usage:");
