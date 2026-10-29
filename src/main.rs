@@ -1,6 +1,6 @@
 use std::env::args;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{File, read};
 use std::io::ErrorKind;
 use std::vec::Vec;
 
@@ -10,12 +10,13 @@ struct WipeStatus {
 
 fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStatus>, Box<dyn Error>> {
   // https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html
-  let status_file = match File::open(status_storage_file_path) {
-    Ok(file) => file,
-    Error(error) => match error.kind() {
+  let raw_data: Vec<u8> = match read(status_storage_file_path) {
+    Ok(data) => data,
+    Err(error) => match error.kind() {
       ErrorKind::NotFound => return Ok(None),
+      _ => return Err(Box::new(error)),
     },
-  }
+  };
   
   Ok(Some(WipeStatus {}))
 }
