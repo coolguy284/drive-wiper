@@ -8,7 +8,10 @@ use std::str::from_utf8;
 use std::vec::Vec;
 
 use atomic_write_file::AtomicWriteFile;
-use json::{JsonValue, parse};
+use json::{JsonValue, object, parse, stringify_pretty};
+
+const STATUS_VERSION: u64 = 1;
+const STATUS_JSON_INDENT: u16 = 2;
 
 #[derive(Debug, Clone)]
 struct StatusFormatError;
@@ -21,6 +24,21 @@ impl fmt::Display for StatusFormatError {
 }
 
 impl Error for StatusFormatError {}
+
+#[derive(Debug, Clone)]
+struct StatusVersionError {
+  expected_ver: u64,
+  actual_ver: u64,
+}
+
+impl fmt::Display for StatusVersionError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Status version incorrect: expected {}, found {}", self.expected_ver, self.actual_ver)?;
+    Ok(())
+  }
+}
+
+impl Error for StatusVersionError {}
 
 #[derive(Debug, Clone)]
 struct ArgDecodeError {
@@ -68,6 +86,15 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
     _ => return Err(Box::new(StatusFormatError)),
   };
   
+  let Some(version) = data_json["version"].as_u64() else { return Err(Box::new(StatusFormatError)) };
+  
+  if version != STATUS_VERSION {
+    return Err(Box::new(StatusVersionError {
+      expected_ver: STATUS_VERSION,
+      actual_ver: version,
+    }));
+  }
+  
   let Some(drive_str) = data_json["drive"].as_str() else { return Err(Box::new(StatusFormatError)) };
   let Some(chunk_size) = data_json["chunk_size"].as_u64() else { return Err(Box::new(StatusFormatError)) };
   let Some(chunk_index) = data_json["chunk_index"].as_u64() else { return Err(Box::new(StatusFormatError)) };
@@ -81,18 +108,39 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
   }))
 }
 
+// identical signature to std::fs::write for parity
 fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> std::io::Result<()> {
   let mut file = AtomicWriteFile::open(path)?;
   file.write_all(contents.as_ref())?;
   Ok(())
 }
 
-fn write_prior_status(status: WipeStatus, status_storage_file_path: String) {
+fn write_prior_status(status: WipeStatus, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
+  let data_json = object!{
+    version: STATUS_VERSION,
+    drive: status.drive,
+    chunk_size: status.chunk_size,
+    chunk_index: status.chunk_index,
+    finished: status.finished,
+  };
   
+  let data_string = stringify_pretty(data_json, STATUS_JSON_INDENT);
+  
+  let data_binary = data_string.as_bytes();
+  
+  match write_atomic(status_storage_file_path, data_binary) {
+    Ok(()) => Ok(()),
+    Err(error) => return Err(Box::new(error)),
+  }
 }
 
 fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
-  read_prior_status(status_storage_file_path)?;
+  let mut status = read_prior_status(status_storage_file_path)?;
+  
+  if let None = status {
+    status = 
+  }
+  
   Ok(())
 }
 
