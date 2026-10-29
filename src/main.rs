@@ -65,6 +65,10 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
   }))
 }
 
+fn write_prior_status(status: WipeStatus, status_storage_file_path: String) {
+  
+}
+
 fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
   read_prior_status(status_storage_file_path)?;
   Ok(())
