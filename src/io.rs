@@ -18,7 +18,7 @@ pub(crate) fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C)
   Ok(())
 }
 
-pub(crate) fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStatus>, Box<dyn Error>> {
+pub(crate) fn read_prior_status(status_storage_file_path: &str) -> Result<Option<WipeStatus>, Box<dyn Error>> {
   // https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html
   let data_binary: Vec<u8> = match read(status_storage_file_path) {
     Ok(data) => data,
@@ -72,7 +72,7 @@ pub(crate) fn read_prior_status(status_storage_file_path: String) -> Result<Opti
   }))
 }
 
-pub(crate) fn write_prior_status(status: WipeStatus, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
+pub(crate) fn write_prior_status(status: WipeStatus, status_storage_file_path: &str) -> Result<(), Box<dyn Error>> {
   let data_json = object!{
     version: STATUS_VERSION,
     params: {

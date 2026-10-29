@@ -23,7 +23,7 @@ fn main() {
   if prgm_args.len() == 2 {
     let status_storage_file_path = prgm_args[1].clone();
     
-    match wipe_drive(None, status_storage_file_path) {
+    match wipe_drive(None, status_storage_file_path.as_str()) {
       Ok(()) => println!("Drive wipe successful."),
       Err(err_box) => println!("Error: {}", err_box),
     }
@@ -52,7 +52,7 @@ fn main() {
           },
           start_chunk_index: start_index,
         }),
-        status_storage_file_path,
+        status_storage_file_path.as_str(),
       )
     {
       Ok(()) => println!("Drive wipe successful."),
