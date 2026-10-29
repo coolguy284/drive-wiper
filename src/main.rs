@@ -90,17 +90,25 @@ fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box
 }
 
 fn decode_prgm_args(prgm_args: ArgsOs) -> Result<Vec<String>, ArgDecodeError> {
-  return prgm_args
-    .enumerate()
-    .map(|(index, os_str)| match os_str.into_string() {
-      String(str) => str,
-      OsString(_) => return ArgDecodeError { arg_index: index },
-    })
-    .collect::<Vec<String>>();
+  return Ok(
+    prgm_args
+      .enumerate()
+      .map(|(index, os_str)| match os_str.into_string() {
+        Ok(str) => str,
+        Err(_) => return ArgDecodeError { arg_index: index },
+      })
+      .collect::<Vec<String>>()
+  );
 }
 
 fn main() {
-  let prgm_args = decode_prgm_args(args_os());
+  let prgm_args = match decode_prgm_args(args_os()) {
+    Ok(prgm_args) => prgm_args,
+    Err(error) => {
+      println!("Error: {}", error);
+      return;
+    },
+  };
   
   if prgm_args.len() != 3 {
     println!("Usage:");
