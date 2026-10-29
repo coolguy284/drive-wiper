@@ -35,14 +35,14 @@ fn main() {
     },
   };
   
-  if prgm_args.len() == 1 {
+  if prgm_args.len() == 2 {
     let status_storage_file_path = prgm_args[1].clone();
     
     match wipe_drive(None, status_storage_file_path) {
       Ok(()) => println!("Drive wipe successful."),
       Err(err_box) => println!("Error: {}", err_box),
     }
-  } else if prgm_args.len() == 3 {
+  } else if prgm_args.len() == 5 {
     let drive = prgm_args[1].clone();
     let chunk_size_str = prgm_args[2].clone();
     let start_index_str = prgm_args[3].clone();
