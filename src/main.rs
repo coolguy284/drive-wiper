@@ -1,30 +1,15 @@
 use std::env::args_os;
-use std::error::Error;
 
 use crate::args::decode_prgm_args;
-use crate::errors::ParamsNotSpecifiedError;
-use crate::io::read_prior_status;
-use crate::structs::{WipeParams, WipeStartingParams, WipeStatus};
+use crate::structs::{WipeParams, WipeStartingParams};
+use crate::wiper::wipe_drive;
 
 mod args;
 mod consts;
 mod errors;
 mod io;
 mod structs;
-
-fn wipe_drive(start_params_opt: Option<WipeStartingParams>, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
-  let mut status = match read_prior_status(status_storage_file_path)? {
-    Some(status) => status,
-    None => match start_params_opt {
-      Some(start_params) => WipeStatus::from(start_params.params),
-      None => return Err(Box::new(ParamsNotSpecifiedError)),
-    },
-  };
-  
-  todo!();
-  
-  Ok(())
-}
+mod wiper;
 
 fn main() {
   let prgm_args = match decode_prgm_args(args_os()) {
