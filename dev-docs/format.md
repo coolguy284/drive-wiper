@@ -2,8 +2,8 @@
 status json:
 {
   drive: string,
-  chunkSize: int,
-  chunkIndex: int,
+  chunk_size: int,
+  chunk_index: int,
   finished: boolean,
 }
 ```

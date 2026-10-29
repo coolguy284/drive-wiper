@@ -1,3 +1,4 @@
+use core::fmt;
 use std::env::args;
 use std::error::Error;
 use std::fs::read;
@@ -5,10 +6,25 @@ use std::io::ErrorKind;
 use std::str::from_utf8;
 use std::vec::Vec;
 
-use json::parse;
+use json::{JsonValue, parse};
+
+#[derive(Debug, Clone)]
+struct StatusFormatError;
+
+impl fmt::Display for StatusFormatError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Invalid format for status file");
+    Ok(())
+  }
+}
+
+impl Error for StatusFormatError {}
 
 struct WipeStatus {
-  
+  drive: String,
+  chunk_size: u64,
+  chunk_index: u64,
+  finished: bool,
 }
 
 fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStatus>, Box<dyn Error>> {
@@ -31,7 +47,22 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
     Err(error) => return Err(Box::new(error)),
   };
   
-  Ok(Some(WipeStatus {}))
+  match data_json {
+    JsonValue::Object(_) => (),
+    _ => return Err(Box::new(StatusFormatError)),
+  };
+  
+  let Some(drive_str) = data_json["drive"].as_str() else { return Err(Box::new(StatusFormatError)) };
+  let Some(chunk_size) = data_json["chunk_size"].as_u64() else { return Err(Box::new(StatusFormatError)) };
+  let Some(chunk_index) = data_json["chunk_index"].as_u64() else { return Err(Box::new(StatusFormatError)) };
+  let Some(finished) = data_json["finished"].as_bool() else { return Err(Box::new(StatusFormatError)) };
+  
+  Ok(Some(WipeStatus {
+    drive: drive_str.to_owned(),
+    chunk_size,
+    chunk_index,
+    finished,
+  }))
 }
 
 fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
