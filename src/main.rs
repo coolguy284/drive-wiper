@@ -1,12 +1,13 @@
 use core::fmt;
-use std::env::{ArgsOs, args, args_os};
+use std::env::{ArgsOs, args_os};
 use std::error::Error;
-use std::ffi::OsString;
 use std::fs::read;
-use std::io::ErrorKind;
+use std::io::{ErrorKind, Write};
+use std::path::Path;
 use std::str::from_utf8;
 use std::vec::Vec;
 
+use atomic_write_file::AtomicWriteFile;
 use json::{JsonValue, parse};
 
 #[derive(Debug, Clone)]
@@ -78,6 +79,12 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
     chunk_index,
     finished,
   }))
+}
+
+fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> std::io::Result<()> {
+  let mut file = AtomicWriteFile::open(path)?;
+  file.write_all(contents.as_ref())?;
+  Ok(())
 }
 
 fn write_prior_status(status: WipeStatus, status_storage_file_path: String) {
