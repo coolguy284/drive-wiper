@@ -1,4 +1,5 @@
 use core::fmt;
+use std::char;
 use std::env::{ArgsOs, args_os};
 use std::error::Error;
 use std::fs::read;
@@ -69,6 +70,11 @@ impl Error for ParamsNotSpecifiedError {}
 struct WipeParams {
   drive: String,
   chunk_size: u64,
+}
+
+struct WipeStartingParams {
+  params: WipeParams,
+  start_chunk_index: u64,
 }
 
 struct WipeStatus {
@@ -169,11 +175,11 @@ fn write_prior_status(status: WipeStatus, status_storage_file_path: String) -> R
   }
 }
 
-fn wipe_drive(params_opt: Option<WipeParams>, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
+fn wipe_drive(start_params_opt: Option<WipeStartingParams>, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
   let mut status = match read_prior_status(status_storage_file_path)? {
     Some(status) => status,
-    None => match params_opt {
-      Some(params) => WipeStatus::from(params),
+    None => match start_params_opt {
+      Some(start_params) => WipeStatus::from(start_params.params),
       None => return Err(Box::new(ParamsNotSpecifiedError)),
     },
   };
@@ -220,11 +226,24 @@ fn main() {
     let start_index_str = prgm_args[3].clone();
     let status_storage_file_path = prgm_args[4].clone();
     
+    let chunk_size = match chunk_size_str.parse::<u64>() {
+      Ok(chunk_size) => chunk_size,
+      Err(error) => return println!("Error: {}", error),
+    };
+    
+    let start_index = match start_index_str.parse::<u64>() {
+      Ok(start_index) => start_index,
+      Err(error) => return println!("Error: {}", error),
+    };
+    
     match
       wipe_drive(
-        Some(WipeParams {
-          drive,
-          chunk_size: chunk_size_str.parse::<u64>(),
+        Some(WipeStartingParams {
+          params: WipeParams {
+            drive,
+            chunk_size,
+          },
+          start_chunk_index: start_index,
         }),
         status_storage_file_path,
       )
