@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs::File;
+use std::io::{Seek, SeekFrom};
 
 use crate::errors::ParamsNotSpecifiedError;
 use crate::io::read_prior_status;
@@ -14,11 +15,13 @@ pub(crate) fn wipe_drive(start_params_opt: Option<WipeStartingParams>, status_st
     },
   };
   
-  File::options()
-    .read(true)
-    .write(true)
-    .open(status_storage_file_path)?;
+  let mut file =
+    File::options()
+      .read(true)
+      .write(true)
+      .open(status_storage_file_path)?;
   
+  file.seek(SeekFrom::Start(status.chunk_index * status.params.chunk_size))?;
   // TODO
   
   Ok(())

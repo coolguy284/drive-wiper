@@ -60,7 +60,10 @@ fn main() {
     }
   } else {
     println!("Usage:");
-    println!("  drive-wiper <drive> <chunk size> <start index> <status storage file>");
-    println!("  drive-wiper <status storage file>");
+    println!("  New wipe:");
+    println!("    drive-wiper <drive> <chunk size> <start index> <status storage file>");
+    println!("  Resuming from previous wipe:");
+    println!("    drive-wiper <status storage file>");
+    println!("    drive-wiper <drive> <status storage file>");
   }
 }
