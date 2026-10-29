@@ -90,15 +90,18 @@ fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box
 }
 
 fn decode_prgm_args(prgm_args: ArgsOs) -> Result<Vec<String>, ArgDecodeError> {
-  return Ok(
+  // https://doc.rust-lang.org/std/result/enum.Result.html#method.from_iter
+  
+  let converted_args: Result<Vec<String>, ArgDecodeError> =
     prgm_args
       .enumerate()
       .map(|(index, os_str)| match os_str.into_string() {
-        Ok(str) => str,
-        Err(_) => return ArgDecodeError { arg_index: index },
+        Ok(str) => Ok(str),
+        Err(_) => Err(ArgDecodeError { arg_index: index }),
       })
-      .collect::<Vec<String>>()
-  );
+      .collect();
+  
+  return converted_args;
 }
 
 fn main() {
