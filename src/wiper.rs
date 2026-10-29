@@ -6,7 +6,7 @@ use crate::errors::ParamsNotSpecifiedError;
 use crate::io::read_prior_status;
 use crate::structs::{WipeStartingParams, WipeStatus};
 
-pub(crate) fn wipe_drive(start_params_opt: Option<WipeStartingParams>, status_storage_file_path: &str) -> Result<(), Box<dyn Error>> {
+pub(crate) fn wipe_drive(start_params_opt: WipeStartingParams) -> Result<(), Box<dyn Error>> {
   let mut status = match read_prior_status(status_storage_file_path)? {
     Some(status) => status,
     None => match start_params_opt {

@@ -21,49 +21,47 @@ fn main() {
   };
   
   let start_params;
-  let status_storage_file_path;
   
   if prgm_args.len() == 2 {
-    start_params = None;
-    status_storage_file_path = prgm_args[1].clone();
+    start_params = WipeStartingParams::ResumeStatusFile {
+      status_storage_file_path: prgm_args[1].clone(),
+    };
   } else if prgm_args.len() == 3 {
-    let drive = prgm_args[1].clone();
-    start_params = None;
-    status_storage_file_path = prgm_args[2].clone();
-  } else if prgm_args.len() == 5 {
-    let drive = prgm_args[1].clone();
+    start_params = WipeStartingParams::ResumeStatusFileWithDrive {
+      drive: prgm_args[1].clone(),
+      status_storage_file_path: prgm_args[2].clone(),
+    };
+  } else if prgm_args.len() == 6 {
     let chunk_size_str = prgm_args[2].clone();
-    let start_index_str = prgm_args[3].clone();
-    status_storage_file_path = prgm_args[4].clone();
+    let start_offset_str = prgm_args[3].clone();
     
     let chunk_size = match chunk_size_str.parse::<u64>() {
       Ok(chunk_size) => chunk_size,
       Err(error) => return println!("Error: {}", error),
     };
     
-    let start_index = match start_index_str.parse::<u64>() {
-      Ok(start_index) => start_index,
+    let start_offset = match start_offset_str.parse::<u64>() {
+      Ok(start_offset) => start_offset,
       Err(error) => return println!("Error: {}", error),
     };
     
-    start_params = Some(WipeStartingParams {
-      params: WipeParams {
-        drive,
-        chunk_size,
-      },
-      start_chunk_index: start_index,
-    });
+    start_params = WipeStartingParams::InitialSetup {
+      drive: prgm_args[1].clone(),
+      chunk_size,
+      status_storage_file_path: prgm_args[4].clone(),
+      start_offset: start_offset,
+    };
   } else {
     println!("Usage:");
     println!("  New wipe:");
-    println!("    drive-wiper <drive> <chunk size> <start index> <status storage file>");
+    println!("    drive-wiper <drive> <chunk size> <start offset> <end offset> <status storage file>");
     println!("  Resuming from previous wipe:");
     println!("    drive-wiper <status storage file>");
     println!("    drive-wiper <drive> <status storage file>");
     return;
   }
   
-  match wipe_drive(start_params, status_storage_file_path.as_str()) {
+  match wipe_drive(start_params) {
     Ok(()) => println!("Drive wipe successful."),
     Err(err_box) => println!("Error: {}", err_box),
   }
