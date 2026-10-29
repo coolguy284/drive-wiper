@@ -54,11 +54,25 @@ impl fmt::Display for ArgDecodeError {
 
 impl Error for ArgDecodeError {}
 
-struct WipeStatus {
+struct WipeParams {
   drive: String,
   chunk_size: u64,
+}
+
+struct WipeStatus {
+  params: WipeParams,
   chunk_index: u64,
   finished: bool,
+}
+
+impl From<WipeParams> for WipeStatus {
+  fn from(value: WipeParams) -> Self {
+    WipeStatus {
+      params: value,
+      chunk_index: 0,
+      finished: false,
+    }
+  }
 }
 
 fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStatus>, Box<dyn Error>> {
@@ -81,10 +95,9 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
     Err(error) => return Err(Box::new(error)),
   };
   
-  match data_json {
-    JsonValue::Object(_) => (),
-    _ => return Err(Box::new(StatusFormatError)),
-  };
+  if !matches!(data_json, JsonValue::Object(_)) {
+    return Err(Box::new(StatusFormatError))
+  }
   
   let Some(version) = data_json["version"].as_u64() else { return Err(Box::new(StatusFormatError)) };
   
@@ -95,14 +108,22 @@ fn read_prior_status(status_storage_file_path: String) -> Result<Option<WipeStat
     }));
   }
   
-  let Some(drive_str) = data_json["drive"].as_str() else { return Err(Box::new(StatusFormatError)) };
-  let Some(chunk_size) = data_json["chunk_size"].as_u64() else { return Err(Box::new(StatusFormatError)) };
+  let params = &data_json["params"];
+  
+  if !matches!(params, JsonValue::Object(_)) {
+    return Err(Box::new(StatusFormatError))
+  }
+  
+  let Some(drive_str) = params["drive"].as_str() else { return Err(Box::new(StatusFormatError)) };
+  let Some(chunk_size) = params["chunk_size"].as_u64() else { return Err(Box::new(StatusFormatError)) };
   let Some(chunk_index) = data_json["chunk_index"].as_u64() else { return Err(Box::new(StatusFormatError)) };
   let Some(finished) = data_json["finished"].as_bool() else { return Err(Box::new(StatusFormatError)) };
   
   Ok(Some(WipeStatus {
-    drive: drive_str.to_owned(),
-    chunk_size,
+    params: WipeParams {
+      drive: drive_str.to_owned(),
+      chunk_size,
+    },
     chunk_index,
     finished,
   }))
@@ -118,8 +139,10 @@ fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> std::io
 fn write_prior_status(status: WipeStatus, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
   let data_json = object!{
     version: STATUS_VERSION,
-    drive: status.drive,
-    chunk_size: status.chunk_size,
+    params: {
+      drive: status.params.drive,
+      chunk_size: status.params.chunk_size,
+    },
     chunk_index: status.chunk_index,
     finished: status.finished,
   };
@@ -134,12 +157,11 @@ fn write_prior_status(status: WipeStatus, status_storage_file_path: String) -> R
   }
 }
 
-fn wipe_drive(drive: String, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
-  let mut status = read_prior_status(status_storage_file_path)?;
-  
-  if let None = status {
-    status = 
-  }
+fn wipe_drive(params: Option<WipeParams>, status_storage_file_path: String) -> Result<(), Box<dyn Error>> {
+  let mut status = match read_prior_status(status_storage_file_path)? {
+    Some(status) => status,
+    None => WipeStatus::from(params),
+  };
   
   Ok(())
 }
@@ -168,16 +190,34 @@ fn main() {
     },
   };
   
-  if prgm_args.len() != 3 {
-    println!("Usage:");
-    println!("  drive-wiper <drive> <status storage file>");
-  } else {
-    let drive = prgm_args[1].clone();
-    let status_storage_file_path = prgm_args[2].clone();
+  if prgm_args.len() == 1 {
+    let status_storage_file_path = prgm_args[1].clone();
     
-    match wipe_drive(drive, status_storage_file_path) {
+    match wipe_drive(None, status_storage_file_path) {
       Ok(()) => println!("Drive wipe successful."),
       Err(err_box) => println!("Error: {}", err_box),
     }
+  } else if prgm_args.len() == 3 {
+    let drive = prgm_args[1].clone();
+    let chunk_size_str = prgm_args[2].clone();
+    let start_index_str = prgm_args[3].clone();
+    let status_storage_file_path = prgm_args[4].clone();
+    
+    match
+      wipe_drive(
+        Some(WipeParams {
+          drive,
+          chunk_size: chunk_size_str.parse::<u64>(),
+        }),
+        status_storage_file_path,
+      )
+    {
+      Ok(()) => println!("Drive wipe successful."),
+      Err(err_box) => println!("Error: {}", err_box),
+    }
+  } else {
+    println!("Usage:");
+    println!("  drive-wiper <drive> <chunk size> <start index> <status storage file>");
+    println!("  drive-wiper <status storage file>");
   }
 }
