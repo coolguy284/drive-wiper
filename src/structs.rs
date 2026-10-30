@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::fmt::Display;
 use std::io::SeekFrom;
 
 use crate::errors::WipeStatusConvertError;
@@ -15,6 +16,15 @@ impl FileOffset {
     match self {
       FileOffset::Start(offset) => offset.to_owned(),
       FileOffset::End(offset) => file_len - offset,
+    }
+  }
+}
+
+impl Display for FileOffset {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      FileOffset::Start(offset) => write!(f, "start + {}", offset),
+      FileOffset::End(offset) => write!(f, "end - {}", offset),
     }
   }
 }
