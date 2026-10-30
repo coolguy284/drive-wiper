@@ -15,6 +15,7 @@ use crate::structs::{WipeParams, WipeStatus};
 pub(crate) fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> std::io::Result<()> {
   let mut file = AtomicWriteFile::open(path)?;
   file.write_all(contents.as_ref())?;
+  file.commit()?;
   Ok(())
 }
 
