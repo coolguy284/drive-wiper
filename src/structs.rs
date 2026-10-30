@@ -32,6 +32,7 @@ impl TryFrom<FileOffset> for SeekFrom {
   }
 }
 
+#[derive(Debug, Clone)]
 pub(crate) enum WipeStartingParams {
   ResumeStatusFile {
     status_storage_file_path: String,

@@ -7,7 +7,7 @@ use crate::io::read_prior_status;
 use crate::structs::WipeStartingParams;
 
 pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn Error>> {
-  let status_storage_file_path = match start_params {
+  let status_storage_file_path = match start_params.clone() {
     WipeStartingParams::ResumeStatusFile {
       status_storage_file_path 
     } => status_storage_file_path,
@@ -27,20 +27,15 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     Some(status) => status,
     None => match start_params {
       WipeStartingParams::ResumeStatusFile {
-        status_storage_file_path
+        ..
       } => return Err(Box::new(ParamsNotSpecifiedError)),
       
       WipeStartingParams::ResumeStatusFileWithDrive {
-        status_storage_file_path,
-        drive, 
+        ..
       } => return Err(Box::new(ParamsNotSpecifiedError)),
       
       WipeStartingParams::InitialSetup {
-        status_storage_file_path,
-        drive,
-        chunk_size,
-        start_offset,
-        end_offset,
+        ..
       } => start_params.to_wipe_status()?,
     },
   };
