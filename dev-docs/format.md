@@ -5,13 +5,15 @@ status json:
   drive: string,
   chunk_size: int,
   start_offset: {
-    location: 'start' | 'end',
+    basis: 'start' | 'end',
     offset: int,
   },
   end_offset: {
-    location: 'start' | 'end',
+    basis: 'start' | 'end',
     offset: int,
   },
+  drive_size: int,
+  current_offset: int,
   finished: boolean,
 }
 ```
