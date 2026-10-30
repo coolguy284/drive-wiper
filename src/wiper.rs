@@ -67,7 +67,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   }
   
   println!("Confirmation acquired, proceeding with wipe...");
-  println!()
+  println!();
   
   let mut file =
     File::options()
