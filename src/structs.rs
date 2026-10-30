@@ -1,7 +1,6 @@
 use std::error::Error;
-use std::fs::metadata;
-
 use crate::errors::WipeStatusConvertError;
+use crate::io::get_drive_size;
 
 #[derive(Debug, Clone)]
 pub(crate) enum FileOffset {
@@ -59,7 +58,7 @@ impl WipeStartingParams {
         end_offset,
         ..
       } => {
-        let drive_size = metadata(drive)?.len();
+        let drive_size = get_drive_size(drive)?;
         
         Ok(WipeStatus {
           drive: drive.to_owned(),

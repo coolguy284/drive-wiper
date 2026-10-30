@@ -1,5 +1,5 @@
 use std::error::Error;
-use std::fs::read;
+use std::fs::{metadata, read};
 use std::io::{ErrorKind, Write};
 use std::path::Path;
 use std::str::from_utf8;
@@ -10,6 +10,10 @@ use json::{JsonValue, object, parse, stringify_pretty};
 use crate::consts::{STATUS_JSON_INDENT, STATUS_VERSION};
 use crate::errors::{StatusFormatError, StatusVersionError};
 use crate::structs::{WipeParams, WipeStatus};
+
+pub(crate) fn get_drive_size<P: AsRef<Path>>(path: P) -> std::io::Result<u64> {
+  Ok(metadata(path)?.len())
+}
 
 // identical signature to std::fs::write for parity
 pub(crate) fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> std::io::Result<()> {
