@@ -1,6 +1,8 @@
 use std::error::Error;
 use std::fmt;
 
+use cli_prompts::prompts::AbortReason;
+
 #[derive(Debug, Clone)]
 pub(crate) struct ArgDecodeError {
   pub(crate) arg_index: usize,
@@ -80,3 +82,29 @@ impl fmt::Display for WipeStatusConvertError {
 }
 
 impl Error for WipeStatusConvertError {}
+
+#[derive(Debug, Clone)]
+pub(crate) struct WipeCancelledError;
+
+impl fmt::Display for WipeCancelledError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Drive wipe cancelled")?;
+    Ok(())
+  }
+}
+
+impl Error for WipeCancelledError {}
+
+#[derive(Debug)]
+pub(crate) struct PromptAbortedError {
+  pub(crate) abort_reason: AbortReason,
+}
+
+impl fmt::Display for PromptAbortedError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Prompt aborted with reason: {:?}", self.abort_reason)?;
+    Ok(())
+  }
+}
+
+impl Error for PromptAbortedError {}

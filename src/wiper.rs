@@ -2,7 +2,10 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{Seek, SeekFrom};
 
-use crate::errors::ParamsNotSpecifiedError;
+use cli_prompts::DisplayPrompt;
+use cli_prompts::prompts::Confirmation;
+
+use crate::errors::{ParamsNotSpecifiedError, PromptAbortedError, WipeCancelledError};
 use crate::io::read_prior_status;
 use crate::structs::WipeStartingParams;
 
@@ -40,8 +43,6 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     },
   };
   
-  // TODO: add confirm to begin wipe, print out info first
-  
   println!("Drive: {}", status.drive);
   println!("Chunk Size: {} B", status.chunk_size);
   println!("Start Offset: {} B", status.start_offset);
@@ -51,7 +52,22 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   println!("Finished: {}", status.finished);
   println!();
   
-  println!("Are you sure you want to wipe the drive?");
+  let answer =
+    Confirmation::new("Are you sure you want to wipe the drive?")
+      .default_positive(false)
+      .display();
+  
+  match answer {
+    Ok(is_positive) => {
+      if !is_positive {
+        return Err(Box::new(WipeCancelledError));
+      }
+    }
+    Err(abort_reason) => return Err(Box::new(PromptAbortedError { abort_reason })),
+  }
+  
+  println!("Confirmation acquired, proceeding with wipe...");
+  println!()
   
   let mut file =
     File::options()
