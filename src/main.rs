@@ -12,7 +12,7 @@ mod io;
 mod structs;
 mod wiper;
 
-fn main_internal() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
   let prgm_args = decode_prgm_args(args_os())?;
   
   let start_params;
@@ -45,7 +45,7 @@ fn main_internal() -> Result<(), Box<dyn Error>> {
     println!("  Resuming from previous wipe:");
     println!("    drive-wiper <status storage file>");
     println!("    drive-wiper <drive> <status storage file>");
-    return;
+    return Ok(());
   }
   
   wipe_drive(start_params)?;
@@ -53,11 +53,4 @@ fn main_internal() -> Result<(), Box<dyn Error>> {
   println!("Drive wipe successful.");
   
   Ok(())
-}
-
-fn main() {
-  match main_internal() {
-    Ok(()) => (),
-    Err(err_box) => println!("Error: {}", err_box),
-  }
 }
