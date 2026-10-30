@@ -1,4 +1,6 @@
 use std::error::Error;
+use std::io::SeekFrom;
+
 use crate::errors::WipeStatusConvertError;
 use crate::io::get_drive_size;
 
@@ -13,6 +15,19 @@ impl FileOffset {
     match self {
       FileOffset::Start(offset) => offset.to_owned(),
       FileOffset::End(offset) => file_len - offset,
+    }
+  }
+}
+
+impl TryFrom<FileOffset> for SeekFrom {
+  type Error = <i64 as TryInto<u64>>::Error;
+  
+  fn try_from(value: FileOffset) -> Result<Self, Self::Error> {
+    match value {
+      FileOffset::Start(offset) => Ok(SeekFrom::Start(offset)),
+      FileOffset::End(offset) => {
+        Ok(SeekFrom::End(offset.try_into()?))
+      },
     }
   }
 }
@@ -45,7 +60,7 @@ pub(crate) struct WipeStatus {
 }
 
 impl WipeStartingParams {
-  fn to_wipe_status(&self) -> Result<WipeStatus, Box<dyn Error>> {
+  pub(crate) fn to_wipe_status(&self) -> Result<WipeStatus, Box<dyn Error>> {
     match self {
       WipeStartingParams::ResumeStatusFile { .. } => Err(Box::new(WipeStatusConvertError)),
       

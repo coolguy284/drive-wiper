@@ -4,10 +4,10 @@ use std::io::{Seek, SeekFrom};
 
 use crate::errors::ParamsNotSpecifiedError;
 use crate::io::read_prior_status;
-use crate::structs::{WipeStartingParams, WipeStatus};
+use crate::structs::WipeStartingParams;
 
-pub(crate) fn wipe_drive(start_params_opt: WipeStartingParams) -> Result<(), Box<dyn Error>> {
-  let status_storage_file_path = match start_params_opt {
+pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn Error>> {
+  let status_storage_file_path = match start_params {
     WipeStartingParams::ResumeStatusFile {
       status_storage_file_path 
     } => status_storage_file_path,
@@ -25,7 +25,7 @@ pub(crate) fn wipe_drive(start_params_opt: WipeStartingParams) -> Result<(), Box
   
   let mut status = match read_prior_status(status_storage_file_path.as_str())? {
     Some(status) => status,
-    None => match start_params_opt {
+    None => match start_params {
       WipeStartingParams::ResumeStatusFile {
         status_storage_file_path
       } => return Err(Box::new(ParamsNotSpecifiedError)),
@@ -41,7 +41,7 @@ pub(crate) fn wipe_drive(start_params_opt: WipeStartingParams) -> Result<(), Box
         chunk_size,
         start_offset,
         end_offset,
-      } => start_params.to_wipe_status(),
+      } => start_params.to_wipe_status()?,
     },
   };
   
@@ -53,7 +53,7 @@ pub(crate) fn wipe_drive(start_params_opt: WipeStartingParams) -> Result<(), Box
       .write(true)
       .open(status_storage_file_path)?;
   
-  file.seek(SeekFrom::Start(status.chunk_index * status.params.chunk_size))?;
+  file.seek(SeekFrom::Start(status.current_offset))?;
   // TODO
   // do fsync to be really sure
   
