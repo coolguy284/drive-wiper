@@ -43,6 +43,20 @@ impl fmt::Display for ArgDecodeError {
 impl Error for ArgDecodeError {}
 
 #[derive(Debug, Clone)]
+pub(crate) struct ArgFormatError {
+  pub(crate) arg_index: usize,
+}
+
+impl fmt::Display for ArgFormatError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Bad format for argument with index {}", self.arg_index)?;
+    Ok(())
+  }
+}
+
+impl Error for ArgFormatError {}
+
+#[derive(Debug, Clone)]
 pub(crate) struct ParamsNotSpecifiedError;
 
 impl fmt::Display for ParamsNotSpecifiedError {
