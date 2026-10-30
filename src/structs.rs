@@ -99,3 +99,7 @@ impl WipeStartingParams {
     }
   }
 }
+
+pub(crate) struct FileByteIterator {
+  
+}
