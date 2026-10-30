@@ -1,7 +1,8 @@
 use std::env::args_os;
+use std::error::Error;
 
 use crate::args::decode_prgm_args;
-use crate::structs::{WipeParams, WipeStartingParams};
+use crate::structs::WipeStartingParams;
 use crate::wiper::wipe_drive;
 
 mod args;
@@ -11,14 +12,8 @@ mod io;
 mod structs;
 mod wiper;
 
-fn main() {
-  let prgm_args = match decode_prgm_args(args_os()) {
-    Ok(prgm_args) => prgm_args,
-    Err(error) => {
-      println!("Error: {}", error);
-      return;
-    },
-  };
+fn main_internal() -> Result<(), Box<dyn Error>> {
+  let prgm_args = decode_prgm_args(args_os())?;
   
   let start_params;
   
@@ -28,28 +23,20 @@ fn main() {
     };
   } else if prgm_args.len() == 3 {
     start_params = WipeStartingParams::ResumeStatusFileWithDrive {
-      drive: prgm_args[1].clone(),
       status_storage_file_path: prgm_args[2].clone(),
+      drive: prgm_args[1].clone(),
     };
   } else if prgm_args.len() == 6 {
-    let chunk_size_str = prgm_args[2].clone();
-    let start_offset_str = prgm_args[3].clone();
-    
-    let chunk_size = match chunk_size_str.parse::<u64>() {
-      Ok(chunk_size) => chunk_size,
-      Err(error) => return println!("Error: {}", error),
-    };
-    
-    let start_offset = match start_offset_str.parse::<u64>() {
-      Ok(start_offset) => start_offset,
-      Err(error) => return println!("Error: {}", error),
-    };
+    let chunk_size = prgm_args[2].clone().parse::<u64>()?;
+    let start_offset = prgm_args[3].clone().parse::<u64>()?;
+    let end_offset = prgm_args[3].clone().parse::<u64>()?;
     
     start_params = WipeStartingParams::InitialSetup {
+      status_storage_file_path: prgm_args[4].clone(),
       drive: prgm_args[1].clone(),
       chunk_size,
-      status_storage_file_path: prgm_args[4].clone(),
-      start_offset: start_offset,
+      start_offset,
+      end_offset,
     };
   } else {
     println!("Usage:");
@@ -61,8 +48,16 @@ fn main() {
     return;
   }
   
-  match wipe_drive(start_params) {
-    Ok(()) => println!("Drive wipe successful."),
+  wipe_drive(start_params)?;
+  
+  println!("Drive wipe successful.");
+  
+  Ok(())
+}
+
+fn main() {
+  match main_internal() {
+    Ok(()) => (),
     Err(err_box) => println!("Error: {}", err_box),
   }
 }

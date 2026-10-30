@@ -13,12 +13,12 @@ pub(crate) enum WipeStartingParams {
     status_storage_file_path: String,
   },
   ResumeStatusFileWithDrive {
-    drive: String,
     status_storage_file_path: String,
+    drive: String,
   },
   InitialSetup {
-    drive: String,
     status_storage_file_path: String,
+    drive: String,
     chunk_size: u64,
     start_offset: FileOffset,
     end_offset: FileOffset,
