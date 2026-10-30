@@ -12,7 +12,7 @@ pub(crate) enum FileOffset {
 }
 
 impl FileOffset {
-  fn to_start_offset(&self, file_len: u64) -> u64 {
+  pub(crate) fn to_start_offset(&self, file_len: u64) -> u64 {
     match self {
       FileOffset::Start(offset) => offset.to_owned(),
       FileOffset::End(offset) => file_len - offset,

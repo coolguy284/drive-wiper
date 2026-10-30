@@ -108,3 +108,18 @@ impl fmt::Display for PromptAbortedError {
 }
 
 impl Error for PromptAbortedError {}
+
+#[derive(Debug)]
+pub(crate) struct DriveIncorrectSizeError {
+  pub(crate) expected_size: u64,
+  pub(crate) actual_size: u64,
+}
+
+impl fmt::Display for DriveIncorrectSizeError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Unexpected size for drive: expected {}, actual {}", self.expected_size, self.actual_size)?;
+    Ok(())
+  }
+}
+
+impl Error for DriveIncorrectSizeError {}
