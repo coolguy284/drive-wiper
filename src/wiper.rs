@@ -92,6 +92,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         status
       },
     },
+    
     None => match start_params {
       WipeStartingParams::ResumeStatusFile {
         ..
@@ -134,7 +135,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
       if !is_positive {
         return Err(Box::new(WipeCancelledError));
       }
-    }
+    },
     Err(abort_reason) => return Err(Box::new(PromptAbortedError { abort_reason })),
   }
   
