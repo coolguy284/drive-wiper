@@ -183,7 +183,7 @@ pub(crate) struct DriveFile {
 }
 
 impl DriveFile {
-  fn open<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+  pub(crate) fn open<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
     let path_processed = path.as_ref().to_string_lossy();
     
     if let Some(regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
@@ -220,7 +220,7 @@ impl DriveFile {
     }
   }
   
-  fn size(&self) -> Result<u64, Box<dyn Error>> {
+  pub(crate) fn size(&self) -> Result<u64, Box<dyn Error>> {
     match &self.backing {
       DriveFileBacking::File(file) => Ok(file.metadata()?.len()),
       DriveFileBacking::Disk(disk) => Ok(disk.size()),

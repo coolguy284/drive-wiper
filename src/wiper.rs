@@ -7,7 +7,7 @@ use cli_prompts::prompts::Confirmation;
 
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, StartOffsetLoweredError, WipeCancelledError};
 use crate::io::{read_status, write_status};
-use crate::structs::WipeStartingParams;
+use crate::structs::{DriveFile, WipeStartingParams};
 
 fn is_zero(data: &[u8]) -> bool {
   // https://stackoverflow.com/questions/65367552/how-to-efficiently-check-a-vecu8-to-see-if-its-all-zeros/65376133#65376133
@@ -141,13 +141,9 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   println!("Confirmation acquired, proceeding with wipe...");
   println!();
   
-  let mut file =
-    File::options()
-      .read(true)
-      .write(true)
-      .open(status.drive.as_str())?;
+  let mut file = DriveFile::open(status.drive.as_str())?;
   
-  let drive_length = file.metadata()?.len();
+  let drive_length = file.size()?;
   
   if drive_length != status.drive_size {
     return Err(Box::new(DriveIncorrectSizeError {
