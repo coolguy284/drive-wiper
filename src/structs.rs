@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::Display;
 use std::fs::{File, metadata};
-use std::io::SeekFrom;
+use std::io::{Seek, SeekFrom};
 use std::path::Path;
 
 use windows_drives::{HarddiskVolume, PhysicalDrive};
@@ -225,6 +225,14 @@ impl DriveFile {
       DriveFileBacking::File(file) => Ok(file.metadata()?.len()),
       DriveFileBacking::Disk(disk) => Ok(disk.size()),
       DriveFileBacking::Partition(partition) => Ok(partition.size()),
+    }
+  }
+  
+  pub(crate) fn seek(&mut self, pos: SeekFrom) -> Result<u64, Box<dyn Error>> {
+    match self.backing {
+      DriveFileBacking::File(ref mut file) => Ok(file.seek(pos)?),
+      DriveFileBacking::Disk(ref mut disk) => Ok(disk.seek(pos)?),
+      DriveFileBacking::Partition(ref mut partition) => Ok(partition.seek(pos)?),
     }
   }
 }
