@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::Display;
 use std::fs::{File, metadata};
-use std::io::{Seek, SeekFrom};
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 
 use windows_drives::{HarddiskVolume, PhysicalDrive};
@@ -233,6 +233,22 @@ impl DriveFile {
       DriveFileBacking::File(ref mut file) => Ok(file.seek(pos)?),
       DriveFileBacking::Disk(ref mut disk) => Ok(disk.seek(pos)?),
       DriveFileBacking::Partition(ref mut partition) => Ok(partition.seek(pos)?),
+    }
+  }
+  
+  pub(crate) fn read_exact(&mut self, buf: &mut [u8]) -> Result<(), Box<dyn Error>> {
+    match self.backing {
+      DriveFileBacking::File(ref mut file) => Ok(file.read_exact(buf)?),
+      DriveFileBacking::Disk(ref mut disk) => Ok(disk.read_exact(buf)?),
+      DriveFileBacking::Partition(ref mut partition) => Ok(partition.read_exact(buf)?),
+    }
+  }
+  
+  pub(crate) fn write_all(&mut self, buf: &[u8]) -> Result<(), Box<dyn Error>> {
+    match self.backing {
+      DriveFileBacking::File(ref mut file) => Ok(file.write_all(buf)?),
+      DriveFileBacking::Disk(ref mut disk) => Ok(disk.write_all(buf)?),
+      DriveFileBacking::Partition(ref mut partition) => Ok(partition.write_all(buf)?),
     }
   }
 }
