@@ -146,7 +146,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     File::options()
       .read(true)
       .write(true)
-      .open(status_storage_file_path.as_str())?;
+      .open(status.drive.as_str())?;
   
   let drive_length = file.metadata()?.len();
   
