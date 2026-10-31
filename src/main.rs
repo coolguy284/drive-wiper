@@ -1,9 +1,11 @@
 use std::env::args_os;
 use std::error::Error;
+use std::sync::LazyLock;
 
 use crate::args::decode_prgm_args;
+use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
 use crate::errors::ArgFormatError;
-use crate::structs::{FileOffset, RegexConstants, WipeStartingParams};
+use crate::structs::{FileOffset, WipeStartingParams};
 use crate::wiper::wipe_drive;
 
 mod args;
@@ -14,7 +16,12 @@ mod structs;
 mod wiper;
 
 fn main() -> Result<(), Box<dyn Error>> {
-  let regex_constants = RegexConstants::new();
+  // Get the panics out of the way at the start of the program in debug mode
+  #[cfg(debug_assertions)]
+  {
+    LazyLock::force(&PHYSICAL_DRIVE_WIN_REGEX);
+    LazyLock::force(&DRIVE_PARTITION_WIN_REGEX);
+  }
   
   let prgm_args = decode_prgm_args(args_os())?;
   

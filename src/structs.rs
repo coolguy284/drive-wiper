@@ -8,20 +8,6 @@ use regex::Regex;
 use crate::errors::WipeStatusConvertError;
 use crate::io::get_drive_size;
 
-pub(crate) struct RegexConstants {
-  pub(crate) PHYSICAL_DRIVE_WIN_REGEX: Regex,
-  pub(crate) DRIVE_PARTITION_WIN_REGEX: Regex,
-}
-
-impl RegexConstants {
-  pub(crate) fn new() -> Self {
-    RegexConstants {
-      PHYSICAL_DRIVE_WIN_REGEX: Regex::new(r"\\.\PhysicalDrive(\d+)").unwrap(),
-      DRIVE_PARTITION_WIN_REGEX: Regex::new(r"\\?\HarddiskVolume(\d+)").unwrap(),
-    }
-  }
-}
-
 #[derive(Debug, Clone)]
 pub(crate) enum FileOffset {
   Start(u64),
