@@ -6,8 +6,8 @@ use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
 
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, WipeCancelledError};
-use crate::io::{read_prior_status, read_status, write_prior_status};
-use crate::structs::{FileByteIterator, WipeStartingParams};
+use crate::io::{read_status, write_status};
+use crate::structs::WipeStartingParams;
 
 fn is_zero(data: &[u8]) -> bool {
   // https://stackoverflow.com/questions/65367552/how-to-efficiently-check-a-vecu8-to-see-if-its-all-zeros/65376133#65376133
@@ -107,7 +107,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     File::options()
       .read(true)
       .write(true)
-      .open(status_storage_file_path)?;
+      .open(status_storage_file_path.as_str())?;
   
   let drive_length = file.metadata()?.len();
   
@@ -118,7 +118,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     }))
   }
   
-  for iteration in Into::<FileByteIterator>::into(status) {
+  for iteration in status.get_iterator() {
     println!("Erasing bytes {}-{}/{}", iteration.start_offset, iteration.end_offset - 1, drive_length);
     
     let mut data: Vec<u8> = vec![];
@@ -138,12 +138,12 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     
     status.current_offset = iteration.end_offset;
     
-    write_status(status, &status_storage_file_path)?;
+    write_status(&status, status_storage_file_path.as_str())?;
   }
   
   status.finished = true;
   
-  write_status(status, &status_storage_file_path)?;
+  write_status(&status, status_storage_file_path.as_str())?;
   
   Ok(())
 }
