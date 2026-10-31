@@ -20,7 +20,7 @@ use winapi::{
             PARTITION_INFORMATION_EX, PARTITION_STYLE_GPT, PARTITION_STYLE_MBR,
             PARTITION_STYLE_RAW,
         },
-        winnt::{FILE_SHARE_READ, FILE_SHARE_WRITE, GENERIC_READ, HANDLE},
+        winnt::{FILE_SHARE_READ, FILE_SHARE_WRITE, GENERIC_READ, GENERIC_WRITE, HANDLE},
     },
 };
 
@@ -262,7 +262,7 @@ fn open_handle(path: &str) -> Result<HANDLE, String> {
     let handle = unsafe {
         fs::CreateFileW(
             path.as_ptr(),
-            GENERIC_READ,
+            GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             null_mut(),
             OPEN_EXISTING,
