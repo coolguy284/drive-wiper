@@ -1,10 +1,12 @@
 use std::error::Error;
 use std::fmt::Display;
+use std::fs::File;
 use std::io::SeekFrom;
 use std::path::Path;
 
-use regex::Regex;
+use windows_drives::{HarddiskVolume, PhysicalDrive};
 
+use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
 use crate::errors::WipeStatusConvertError;
 use crate::io::get_drive_size;
 
@@ -171,12 +173,39 @@ pub(crate) struct FileByteIteratorOutput {
   pub(crate) length: u64,
 }
 
+enum DriveFileBacking {
+  File(File),
+  Disk(PhysicalDrive),
+  Partition(HarddiskVolume),
+}
+
 pub(crate) struct DriveFile {
-  
+  backing: DriveFileBacking,
 }
 
 impl DriveFile {
-  fn open<P: AsRef<Path>>(path: P) {
-    path.as_ref().to_string_lossy();
+  fn open<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+    let path_processed = path.as_ref().to_string_lossy();
+    
+    if let Some(regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
+      let drive_index = regex_match.as_str().parse::<u8>()?;
+      Ok(DriveFile {
+        backing: DriveFileBacking::Disk(PhysicalDrive::open(drive_index)?),
+      })
+    } else if let Some(regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_processed) {
+      let partition_index = regex_match.as_str().parse::<u8>()?;
+      Ok(DriveFile {
+        backing: DriveFileBacking::Partition(HarddiskVolume::open(partition_index)?),
+      })
+    } else {
+      Ok(DriveFile {
+        backing: DriveFileBacking::File(
+          File::options()
+            .read(true)
+            .write(true)
+            .open(path)?
+        ),
+      })
+    }
   }
 }
