@@ -6,7 +6,7 @@ use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
 
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, WipeCancelledError};
-use crate::io::read_prior_status;
+use crate::io::{read_prior_status, read_status, write_prior_status};
 use crate::structs::{FileByteIterator, WipeStartingParams};
 
 fn is_zero(data: &[u8]) -> bool {
@@ -52,7 +52,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     } => status_storage_file_path,
   };
   
-  let mut status = match read_prior_status(status_storage_file_path.as_str())? {
+  let mut status = match read_status(status_storage_file_path.as_str())? {
     Some(status) => status,
     None => match start_params {
       WipeStartingParams::ResumeStatusFile {
@@ -68,6 +68,13 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
       } => start_params.to_wipe_status()?,
     },
   };
+  
+  if status.finished {
+    println!("Drive wipe file is for an already finished drive wipe");
+    println!("If this was not intentional, delete the status file and try again");
+    
+    return Ok(());
+  }
   
   println!("Drive: {}", status.drive);
   println!("Chunk Size: {} B", status.chunk_size);
@@ -123,11 +130,20 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     
     if !is_zero(data.as_slice()) {
       println!("Found nonzero data, erasing...");
+      
       file.seek(SeekFrom::Start(iteration.start_offset))?;
       file.write_all(data.as_slice())?;
       file.sync_data()?;
     }
+    
+    status.current_offset = iteration.end_offset;
+    
+    write_status(status, &status_storage_file_path)?;
   }
+  
+  status.finished = true;
+  
+  write_status(status, &status_storage_file_path)?;
   
   Ok(())
 }

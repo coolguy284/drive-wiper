@@ -53,7 +53,7 @@ fn offset_to_json(offset: FileOffset) -> JsonValue {
   }
 }
 
-pub(crate) fn read_prior_status(status_storage_file_path: &str) -> Result<Option<WipeStatus>, Box<dyn Error>> {
+pub(crate) fn read_status(status_storage_file_path: &str) -> Result<Option<WipeStatus>, Box<dyn Error>> {
   // https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html
   let data_binary: Vec<u8> = match read(status_storage_file_path) {
     Ok(data) => data,
@@ -108,13 +108,13 @@ pub(crate) fn read_prior_status(status_storage_file_path: &str) -> Result<Option
   }))
 }
 
-pub(crate) fn write_prior_status(status: WipeStatus, status_storage_file_path: &str) -> Result<(), Box<dyn Error>> {
+pub(crate) fn write_status(status: &WipeStatus, status_storage_file_path: &str) -> Result<(), Box<dyn Error>> {
   let data_json = object! {
     version: STATUS_VERSION,
-    drive: status.drive,
+    drive: status.drive.clone(),
     chunk_size: status.chunk_size,
-    start_offset: offset_to_json(status.start_offset),
-    end_offset: offset_to_json(status.end_offset),
+    start_offset: offset_to_json(status.start_offset.clone()),
+    end_offset: offset_to_json(status.end_offset.clone()),
     drive_size: status.drive_size,
     current_offset: status.current_offset,
     finished: status.finished,

@@ -107,8 +107,8 @@ pub(crate) struct FileByteIterator {
   current_offset: u64,
 }
 
-impl Into<FileByteIterator> for WipeStatus {
-  fn into(self) -> FileByteIterator {
+impl WipeStatus {
+  pub(crate) fn get_iterator(&self) -> FileByteIterator {
     FileByteIterator {
       chunk_size: self.chunk_size,
       end_offset: self.end_offset.to_start_offset(self.drive_size),
@@ -129,14 +129,12 @@ impl Iterator for FileByteIterator {
           start_offset: self.current_offset,
           end_offset: self.end_offset,
           length: self.current_offset - self.end_offset,
-          partial: true,
         })
       } else {
         Some(FileByteIteratorOutput {
           start_offset: self.current_offset,
           end_offset: end_offset_attempt,
           length: self.chunk_size,
-          partial: false,
         })
       }
     } else {
@@ -150,5 +148,4 @@ pub(crate) struct FileByteIteratorOutput {
   pub(crate) start_offset: u64,
   pub(crate) end_offset: u64,
   pub(crate) length: u64,
-  pub(crate) partial: bool,
 }
