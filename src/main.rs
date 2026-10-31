@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
       status_storage_file_path: prgm_args[2].clone(),
       drive: prgm_args[1].clone(),
     };
-  } else if prgm_args.len() == 6 {
+  } else if prgm_args.len() == 8 {
     let chunk_size = prgm_args[2].clone().parse::<u64>()?;
     let start_offset_basis = prgm_args[3].clone();
     let start_offset = prgm_args[4].clone().parse::<u64>()?;
@@ -35,16 +35,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let end_offset = prgm_args[6].clone().parse::<u64>()?;
     
     start_params = WipeStartingParams::InitialSetup {
-      status_storage_file_path: prgm_args[4].clone(),
+      status_storage_file_path: prgm_args[7].clone(),
       drive: prgm_args[1].clone(),
       chunk_size,
       start_offset: match start_offset_basis.as_str() {
-        "begin" => FileOffset::Start(start_offset),
+        "start" => FileOffset::Start(start_offset),
         "end" => FileOffset::End(start_offset),
         _ => return Err(Box::new(ArgFormatError { arg_index: 3 })),
       },
       end_offset: match end_offset_basis.as_str() {
-        "begin" => FileOffset::Start(end_offset),
+        "start" => FileOffset::Start(end_offset),
         "end" => FileOffset::End(end_offset),
         _ => return Err(Box::new(ArgFormatError{ arg_index: 5 })),
       },
