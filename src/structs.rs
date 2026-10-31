@@ -251,4 +251,12 @@ impl DriveFile {
       DriveFileBacking::Partition(ref mut partition) => Ok(partition.write_all(buf)?),
     }
   }
+  
+  pub(crate) fn sync_data(&mut self) -> Result<(), Box<dyn Error>> {
+    match self.backing {
+      DriveFileBacking::File(ref mut file) => Ok(file.sync_data()?),
+      DriveFileBacking::Disk(ref mut disk) => Ok(disk.sync_data()?),
+      DriveFileBacking::Partition(ref mut partition) => Ok(partition.sync_data()?),
+    }
+  }
 }

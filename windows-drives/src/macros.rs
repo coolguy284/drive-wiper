@@ -85,7 +85,9 @@ macro_rules! impl_physical {
                 }
                 
                 fn flush(&mut self) -> std::io::Result<()> {
-                    todo!();
+                    // File::flush is a no-op on Unix and Windows, so making it a no-op here too:
+                    // https://doc.rust-lang.org/std/fs/struct.File.html#method.flush
+                    Ok(())
                 }
             }
 
@@ -146,6 +148,29 @@ macro_rules! impl_physical {
                 fn drop(&mut self) {
                     unsafe {
                         CloseHandle(self.handle);
+                    }
+                }
+            }
+            
+            impl $type {
+                fn sync_data(&mut self) -> std::io::Result<()> {
+                    let res = unsafe {
+                        // https://stackoverflow.com/questions/7575313/windows-equivalent-to-sync/7575393#7575393
+                        fs::FlushFileBuffers(
+                            self.handle
+                        )
+                    };
+                    
+                    if res == 0 {
+                        Err(io::Error::new(
+                            io::ErrorKind::Other,
+                            format!(
+                                "Could not sync_data: error code {:#08x}",
+                                win32::last_error()
+                            )
+                        ))
+                    } else {
+                        Ok(())
                     }
                 }
             }
