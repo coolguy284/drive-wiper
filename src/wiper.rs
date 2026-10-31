@@ -74,10 +74,13 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         end_offset,
         ..
       } => {
-        if start_offset < status.start_offset {
+        let original_start_offset_from_start = status.start_offset.to_start_offset(status.drive_size);
+        let new_start_offset_from_start = start_offset.to_start_offset(status.drive_size);
+        
+        if original_start_offset_from_start < new_start_offset_from_start {
           return Err(Box::new(StartOffsetLoweredError {
-            original_offset: status.start_offset,
-            new_offset: start_offset,
+            original_offset: original_start_offset_from_start,
+            new_offset: new_start_offset_from_start,
           }))
         }
         
