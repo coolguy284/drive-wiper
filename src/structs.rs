@@ -119,7 +119,8 @@ impl WipeStatus {
 
 impl Iterator for FileByteIterator {
   type Item = FileByteIteratorOutput;
-
+  
+  // TODO: do a prechunk before the main body of chunks to get aligned with the chunk offset
   fn next(&mut self) -> Option<Self::Item> {
     if self.current_offset < self.end_offset {
       let end_offset_attempt = self.current_offset + self.chunk_size;

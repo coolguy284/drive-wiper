@@ -123,3 +123,18 @@ impl fmt::Display for DriveIncorrectSizeError {
 }
 
 impl Error for DriveIncorrectSizeError {}
+
+#[derive(Debug)]
+pub(crate) struct StartOffsetLoweredError {
+  pub(crate) original_offset: u64,
+  pub(crate) new_offset: u64,
+}
+
+impl fmt::Display for StartOffsetLoweredError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Wipe start offset was lowered: originally {}, now {}", self.original_offset, self.new_offset)?;
+    Ok(())
+  }
+}
+
+impl Error for StartOffsetLoweredError {}

@@ -5,7 +5,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
 
-use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, WipeCancelledError};
+use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, StartOffsetLoweredError, WipeCancelledError};
 use crate::io::{read_status, write_status};
 use crate::structs::WipeStartingParams;
 
@@ -53,7 +53,42 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   };
   
   let mut status = match read_status(status_storage_file_path.as_str())? {
-    Some(status) => status,
+    Some(mut status) => match start_params {
+      WipeStartingParams::ResumeStatusFile {
+        ..
+      } => status,
+      
+      WipeStartingParams::ResumeStatusFileWithDrive {
+        drive,
+        ..
+      } => {
+        status.drive = drive;
+        
+        status
+      },
+      
+      WipeStartingParams::InitialSetup {
+        drive,
+        chunk_size,
+        start_offset,
+        end_offset,
+        ..
+      } => {
+        if start_offset < status.start_offset {
+          return Err(Box::new(StartOffsetLoweredError {
+            original_offset: status.start_offset,
+            new_offset: start_offset,
+          }))
+        }
+        
+        status.drive = drive;
+        status.chunk_size = chunk_size;
+        status.start_offset = start_offset;
+        status.end_offset = end_offset;
+        
+        status
+      },
+    },
     None => match start_params {
       WipeStartingParams::ResumeStatusFile {
         ..
