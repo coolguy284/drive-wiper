@@ -3,7 +3,7 @@ use std::error::Error;
 
 use crate::args::decode_prgm_args;
 use crate::errors::ArgFormatError;
-use crate::structs::{FileOffset, WipeStartingParams};
+use crate::structs::{FileOffset, RegexConstants, WipeStartingParams};
 use crate::wiper::wipe_drive;
 
 mod args;
@@ -14,6 +14,8 @@ mod structs;
 mod wiper;
 
 fn main() -> Result<(), Box<dyn Error>> {
+  let regex_constants = RegexConstants::new();
+  
   let prgm_args = decode_prgm_args(args_os())?;
   
   let start_params;

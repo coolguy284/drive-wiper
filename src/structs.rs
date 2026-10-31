@@ -1,9 +1,26 @@
 use std::error::Error;
 use std::fmt::Display;
 use std::io::SeekFrom;
+use std::path::Path;
+
+use regex::Regex;
 
 use crate::errors::WipeStatusConvertError;
 use crate::io::get_drive_size;
+
+pub(crate) struct RegexConstants {
+  pub(crate) PHYSICAL_DRIVE_WIN_REGEX: Regex,
+  pub(crate) DRIVE_PARTITION_WIN_REGEX: Regex,
+}
+
+impl RegexConstants {
+  pub(crate) fn new() -> Self {
+    RegexConstants {
+      PHYSICAL_DRIVE_WIN_REGEX: Regex::new(r"\\.\PhysicalDrive(\d+)").unwrap(),
+      DRIVE_PARTITION_WIN_REGEX: Regex::new(r"\\?\HarddiskVolume(\d+)").unwrap(),
+    }
+  }
+}
 
 #[derive(Debug, Clone)]
 pub(crate) enum FileOffset {
@@ -166,4 +183,14 @@ pub(crate) struct FileByteIteratorOutput {
   pub(crate) start_offset: u64,
   pub(crate) end_offset: u64,
   pub(crate) length: u64,
+}
+
+pub(crate) struct DriveFile {
+  
+}
+
+impl DriveFile {
+  fn open<P: AsRef<Path>>(path: P) {
+    path.as_ref().to_string_lossy();
+  }
 }
