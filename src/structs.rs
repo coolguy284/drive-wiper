@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::fmt::Display;
-use std::fs::File;
+use std::fs::{File, metadata};
 use std::io::SeekFrom;
 use std::path::Path;
 
@@ -206,6 +206,26 @@ impl DriveFile {
             .open(path)?
         ),
       })
+    }
+  }
+  
+  fn get_drive_size<P: AsRef<Path>>(path: P) -> Result<u64, Box<dyn Error>> {
+    let path_processed = path.as_ref().to_string_lossy();
+    
+    if let Some(regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
+      Self::open(path)?.size()
+    } else if let Some(regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_processed) {
+      Self::open(path)?.size()
+    } else {
+      Ok(metadata(path)?.len())
+    }
+  }
+  
+  fn size(&self) -> Result<u64, Box<dyn Error>> {
+    match &self.backing {
+      DriveFileBacking::File(file) => Ok(file.metadata()?.len()),
+      DriveFileBacking::Disk(disk) => Ok(disk.size()),
+      DriveFileBacking::Partition(partition) => Ok(partition.size()),
     }
   }
 }
