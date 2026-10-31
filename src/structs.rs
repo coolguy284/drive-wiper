@@ -135,17 +135,25 @@ impl Iterator for FileByteIterator {
       };
       
       if end_offset_attempt > self.end_offset {
-        Some(FileByteIteratorOutput {
+        let result = Some(FileByteIteratorOutput {
           start_offset: self.current_offset,
           end_offset: self.end_offset,
           length: self.current_offset - self.end_offset,
-        })
+        });
+        
+        self.current_offset = self.end_offset;
+        
+        result
       } else {
-        Some(FileByteIteratorOutput {
+        let result = Some(FileByteIteratorOutput {
           start_offset: self.current_offset,
           end_offset: end_offset_attempt,
           length: length_attempt,
-        })
+        });
+        
+        self.current_offset = end_offset_attempt;
+        
+        result
       }
     } else {
       None
