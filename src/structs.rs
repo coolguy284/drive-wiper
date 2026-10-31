@@ -8,7 +8,6 @@ use windows_drives::{HarddiskVolume, PhysicalDrive};
 
 use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
 use crate::errors::WipeStatusConvertError;
-use crate::io::get_drive_size;
 
 #[derive(Debug, Clone)]
 pub(crate) enum FileOffset {
@@ -89,7 +88,7 @@ impl WipeStartingParams {
         end_offset,
         ..
       } => {
-        let drive_size = get_drive_size(drive)?;
+        let drive_size = DriveFile::get_drive_size(drive)?;
         
         Ok(WipeStatus {
           drive: drive.to_owned(),
@@ -212,9 +211,9 @@ impl DriveFile {
   fn get_drive_size<P: AsRef<Path>>(path: P) -> Result<u64, Box<dyn Error>> {
     let path_processed = path.as_ref().to_string_lossy();
     
-    if let Some(regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
+    if let Some(_regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
       Self::open(path)?.size()
-    } else if let Some(regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_processed) {
+    } else if let Some(_regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_processed) {
       Self::open(path)?.size()
     } else {
       Ok(metadata(path)?.len())
