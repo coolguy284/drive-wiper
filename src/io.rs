@@ -120,7 +120,7 @@ pub(crate) fn write_status(status: &WipeStatus, status_storage_file_path: &str) 
     finished: status.finished,
   };
   
-  let data_string = stringify_pretty(data_json, STATUS_JSON_INDENT);
+  let data_string = stringify_pretty(data_json, STATUS_JSON_INDENT) + "\n";
   
   let data_binary = data_string.as_bytes();
   
