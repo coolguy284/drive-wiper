@@ -138,7 +138,7 @@ impl Iterator for FileByteIterator {
         let result = Some(FileByteIteratorOutput {
           start_offset: self.current_offset,
           end_offset: self.end_offset,
-          length: self.current_offset - self.end_offset,
+          length: self.end_offset - self.current_offset,
         });
         
         self.current_offset = self.end_offset;
