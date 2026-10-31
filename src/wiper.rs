@@ -127,7 +127,6 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   let answer =
     Confirmation::new("Are you sure you want to wipe the drive?")
       .default_positive(false)
-      //.style(ConfirmationStyle::default()) (TODO: remove this if this line ends up not being needed)
       .display();
   
   match answer {
