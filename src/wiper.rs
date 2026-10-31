@@ -1,13 +1,39 @@
 use std::error::Error;
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Read, Seek, SeekFrom, Write};
 
 use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
 
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, WipeCancelledError};
 use crate::io::read_prior_status;
-use crate::structs::WipeStartingParams;
+use crate::structs::{FileByteIterator, WipeStartingParams};
+
+fn is_zero(data: &[u8]) -> bool {
+  // https://stackoverflow.com/questions/65367552/how-to-efficiently-check-a-vecu8-to-see-if-its-all-zeros/65376133#65376133
+  
+  let (prefix, chunks, suffix) = unsafe { data.align_to::<u128>() };
+  
+  for byte in prefix {
+    if byte.to_owned() != 0 {
+      return false
+    }
+  }
+  
+  for chunk in chunks {
+    if chunk.to_owned() != 0 {
+      return false
+    }
+  }
+  
+  for byte in suffix {
+    if byte.to_owned() != 0 {
+      return false
+    }
+  }
+  
+  true
+}
 
 pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn Error>> {
   let status_storage_file_path = match start_params.clone() {
@@ -85,17 +111,23 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     }))
   }
   
-  let start_offset_from_start = status.start_offset.to_start_offset(drive_length);
-  let end_offset_from_start = status.end_offset.to_start_offset(drive_length);
-  
-  for offset in (start_offset_from_start..=end_offset_from_start).step_by(status.chunk_size) {
+  for iteration in Into::<FileByteIterator>::into(status) {
+    println!("Erasing bytes {}-{}/{}", iteration.start_offset, iteration.end_offset - 1, drive_length);
     
+    let mut data: Vec<u8> = vec![];
+    
+    data.resize(iteration.length.try_into()?, 0);
+    
+    file.seek(SeekFrom::Start(iteration.start_offset))?;
+    file.read_exact(data.as_mut_slice())?;
+    
+    if !is_zero(data.as_slice()) {
+      println!("Found nonzero data, erasing...");
+      file.seek(SeekFrom::Start(iteration.start_offset))?;
+      file.write_all(data.as_slice())?;
+      file.sync_data()?;
+    }
   }
-  
-  file.seek(SeekFrom::Start(status.current_offset))?;
-  file.read_exact(buf);
-  // TODO
-  // do fsync to be really sure
   
   Ok(())
 }

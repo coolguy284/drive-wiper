@@ -100,6 +100,55 @@ impl WipeStartingParams {
   }
 }
 
+// start is inclusive, end is exclusive
 pub(crate) struct FileByteIterator {
-  
+  chunk_size: u64,
+  end_offset: u64,
+  current_offset: u64,
+}
+
+impl Into<FileByteIterator> for WipeStatus {
+  fn into(self) -> FileByteIterator {
+    FileByteIterator {
+      chunk_size: self.chunk_size,
+      end_offset: self.end_offset.to_start_offset(self.drive_size),
+      current_offset: self.current_offset,
+    }
+  }
+}
+
+impl Iterator for FileByteIterator {
+  type Item = FileByteIteratorOutput;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.current_offset < self.end_offset {
+      let end_offset_attempt = self.current_offset + self.chunk_size;
+      
+      if end_offset_attempt > self.end_offset {
+        Some(FileByteIteratorOutput {
+          start_offset: self.current_offset,
+          end_offset: self.end_offset,
+          length: self.current_offset - self.end_offset,
+          partial: true,
+        })
+      } else {
+        Some(FileByteIteratorOutput {
+          start_offset: self.current_offset,
+          end_offset: end_offset_attempt,
+          length: self.chunk_size,
+          partial: false,
+        })
+      }
+    } else {
+      None
+    }
+  }
+}
+
+// bound is [start, end)
+pub(crate) struct FileByteIteratorOutput {
+  pub(crate) start_offset: u64,
+  pub(crate) end_offset: u64,
+  pub(crate) length: u64,
+  pub(crate) partial: bool,
 }

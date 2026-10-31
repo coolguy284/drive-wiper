@@ -53,6 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Usage:");
     println!("  New wipe:");
     println!("    drive-wiper <drive> <chunk size> <start offset basis> <start offset> <end offset basis> <end offset> <status storage file>");
+    println!("    (Both end and start index are inclusive)");
     println!("  Resuming from previous wipe:");
     println!("    drive-wiper <status storage file>");
     println!("    drive-wiper <drive> <status storage file>");
