@@ -186,26 +186,34 @@ impl DriveFile {
   pub(crate) fn open<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
     let path_processed = path.as_ref().to_string_lossy();
     
-    if let Some(regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
-      let drive_index = regex_match.as_str().parse::<u8>()?;
-      Ok(DriveFile {
-        backing: DriveFileBacking::Disk(PhysicalDrive::open(drive_index)?),
-      })
-    } else if let Some(regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_processed) {
-      let partition_index = regex_match.as_str().parse::<u8>()?;
-      Ok(DriveFile {
-        backing: DriveFileBacking::Partition(HarddiskVolume::open(partition_index)?),
-      })
-    } else {
-      Ok(DriveFile {
-        backing: DriveFileBacking::File(
-          File::options()
-            .read(true)
-            .write(true)
-            .open(path)?
-        ),
-      })
+    if let Some(regex_captures) = PHYSICAL_DRIVE_WIN_REGEX.captures(&path_processed) {
+      if let Some(regex_match) = regex_captures.get(1) {
+        let drive_index = regex_match.as_str().parse::<u8>()?;
+        
+        return Ok(DriveFile {
+          backing: DriveFileBacking::Disk(PhysicalDrive::open(drive_index)?),
+        })
+      }
     }
+    
+    if let Some(regex_captures) = DRIVE_PARTITION_WIN_REGEX.captures(&path_processed) {
+      if let Some(regex_match) = regex_captures.get(1) {
+        let partition_index = regex_match.as_str().parse::<u8>()?;
+        
+        return Ok(DriveFile {
+          backing: DriveFileBacking::Partition(HarddiskVolume::open(partition_index)?),
+        })
+      }
+    }
+    
+    Ok(DriveFile {
+      backing: DriveFileBacking::File(
+        File::options()
+          .read(true)
+          .write(true)
+          .open(path)?
+      ),
+    })
   }
   
   fn get_drive_size<P: AsRef<Path>>(path: P) -> Result<u64, Box<dyn Error>> {
