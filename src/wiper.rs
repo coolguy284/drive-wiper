@@ -171,6 +171,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
       println!("Found nonzero data, erasing...");
       
       data.clear();
+      data.resize(iteration.length.try_into()?, 0);
       
       file.seek(SeekFrom::Start(iteration.start_offset))?;
       file.write_all(data.as_slice())?;
