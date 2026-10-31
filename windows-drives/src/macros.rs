@@ -153,7 +153,7 @@ macro_rules! impl_physical {
             }
             
             impl $type {
-                fn sync_data(&mut self) -> std::io::Result<()> {
+                pub fn sync_data(&mut self) -> std::io::Result<()> {
                     let res = unsafe {
                         // https://stackoverflow.com/questions/7575313/windows-equivalent-to-sync/7575393#7575393
                         fs::FlushFileBuffers(

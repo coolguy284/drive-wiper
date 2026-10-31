@@ -1,6 +1,5 @@
 use std::error::Error;
-use std::fs::File;
-use std::io::{Read, Seek, SeekFrom, Write};
+use std::io::SeekFrom;
 
 use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
