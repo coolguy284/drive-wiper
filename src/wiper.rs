@@ -158,7 +158,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   }
   
   for iteration in status.get_iterator() {
-    println!("Erasing bytes {}-{}/{}", iteration.start_offset, iteration.end_offset - 1, drive_length);
+    println!("Erasing bytes {}-{}/{}", iteration.start_offset, iteration.end_offset - 1, drive_length - 1);
     
     let mut data: Vec<u8> = vec![];
     
