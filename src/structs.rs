@@ -105,6 +105,7 @@ pub(crate) struct FileByteIterator {
   chunk_size: u64,
   end_offset: u64,
   current_offset: u64,
+  currently_chunk_aligned: bool,
 }
 
 impl WipeStatus {
@@ -113,6 +114,7 @@ impl WipeStatus {
       chunk_size: self.chunk_size,
       end_offset: self.end_offset.to_start_offset(self.drive_size),
       current_offset: self.current_offset,
+      currently_chunk_aligned: self.current_offset % self.chunk_size != 0,
     }
   }
 }
@@ -120,10 +122,17 @@ impl WipeStatus {
 impl Iterator for FileByteIterator {
   type Item = FileByteIteratorOutput;
   
-  // TODO: do a prechunk before the main body of chunks to get aligned with the chunk offset
   fn next(&mut self) -> Option<Self::Item> {
     if self.current_offset < self.end_offset {
-      let end_offset_attempt = self.current_offset + self.chunk_size;
+      let (end_offset_attempt, length_attempt) = if !self.currently_chunk_aligned {
+        self.currently_chunk_aligned = true;
+        
+        let bytes_needed_to_align = self.chunk_size - self.current_offset % self.chunk_size;
+        
+        (self.current_offset + bytes_needed_to_align, bytes_needed_to_align)
+      } else {
+        (self.current_offset + self.chunk_size, self.chunk_size)
+      };
       
       if end_offset_attempt > self.end_offset {
         Some(FileByteIteratorOutput {
@@ -135,7 +144,7 @@ impl Iterator for FileByteIterator {
         Some(FileByteIteratorOutput {
           start_offset: self.current_offset,
           end_offset: end_offset_attempt,
-          length: self.chunk_size,
+          length: length_attempt,
         })
       }
     } else {
