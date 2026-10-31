@@ -42,6 +42,52 @@ macro_rules! impl_physical {
                     }
                 }
             }
+            
+            impl Write for $type {
+                fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+                    let sector_size = self.geometry.bytes_per_sector;
+                    if buf.len() < sector_size as usize {
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidInput,
+                            format!("Could not write: buffer too small, must be at least {} bytes", sector_size)
+                        ));
+                    } else if (buf.len() % sector_size as usize) != 0 {
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidInput,
+                            format!(
+                                "Could not write: buffer size must be a multiple of {} but is {}",
+                                sector_size, buf.len()
+                            )
+                        ));
+                    }
+
+                    let mut bytes_written = 0u32;
+                    let res = unsafe {
+                        fs::WriteFile(
+                            self.handle,
+                            buf.as_ptr() as *mut c_void,
+                            (buf.len() as u32 / sector_size) * sector_size,
+                            &mut bytes_written,
+                            null_mut()
+                        )
+                    };
+                    if res == 0 {
+                        Err(io::Error::new(
+                            io::ErrorKind::Other,
+                            format!(
+                                "Could not write: error code {:#08x}",
+                                win32::last_error()
+                            )
+                        ))
+                    } else {
+                        Ok(bytes_written as usize)
+                    }
+                }
+                
+                fn flush(&mut self) -> std::io::Result<()> {
+                    todo!();
+                }
+            }
 
             impl Seek for $type {
                 fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {

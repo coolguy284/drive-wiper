@@ -3,7 +3,7 @@ use derive_try_from_primitive::TryFromPrimitive;
 use std::{
     cmp::min,
     convert::TryFrom,
-    io::{self, Cursor, Read, Seek, SeekFrom},
+    io::{self, Cursor, Read, Seek, SeekFrom, Write},
     mem::size_of,
     ptr::null_mut,
 };
