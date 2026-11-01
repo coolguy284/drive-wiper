@@ -1,6 +1,6 @@
 # https://nixos-and-flakes.thiscute.world/development/intro
 {
-  description = "Rust Nix compilation test.";
+  description = "A hard drive wiping program that only wipes nonzero data chunks.";
   
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
