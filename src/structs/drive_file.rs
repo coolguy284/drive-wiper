@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::fs::{File, metadata};
-use std::io::SeekFrom;
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 
 // https://stackoverflow.com/questions/51821451/how-to-use-a-crate-only-for-a-given-platform/51821632#51821632
@@ -65,7 +65,7 @@ impl DriveFile {
     })
   }
   
-  fn get_drive_size<P: AsRef<Path>>(path: P) -> Result<u64, Box<dyn Error>> {
+  pub(crate) fn get_drive_size<P: AsRef<Path>>(path: P) -> Result<u64, Box<dyn Error>> {
     let path_processed = path.as_ref().to_string_lossy();
     
     if let Some(_regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {

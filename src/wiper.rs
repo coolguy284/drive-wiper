@@ -6,7 +6,8 @@ use cli_prompts::prompts::Confirmation;
 
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, StartOffsetLoweredError, WipeCancelledError};
 use crate::io::{read_status, write_status};
-use crate::structs::{DriveFile, WipeStartingParams};
+use crate::structs::drive_file::DriveFile;
+use crate::structs::wipe_status_related::WipeStartingParams;
 
 fn is_zero(data: &[u8]) -> bool {
   // https://stackoverflow.com/questions/65367552/how-to-efficiently-check-a-vecu8-to-see-if-its-all-zeros/65376133#65376133

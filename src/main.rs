@@ -5,7 +5,8 @@ use std::sync::LazyLock;
 use crate::args::decode_prgm_args;
 use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
 use crate::errors::ArgFormatError;
-use crate::structs::{FileOffset, WipeStartingParams};
+use crate::structs::file_offset::FileOffset;
+use crate::structs::wipe_status_related::WipeStartingParams;
 use crate::wiper::wipe_drive;
 
 mod args;

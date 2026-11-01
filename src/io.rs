@@ -9,7 +9,8 @@ use json::{JsonValue, object, parse, stringify_pretty};
 
 use crate::consts::{STATUS_JSON_INDENT, STATUS_VERSION};
 use crate::errors::{StatusFormatError, StatusVersionError};
-use crate::structs::{FileOffset, WipeStatus};
+use crate::structs::file_offset::FileOffset;
+use crate::structs::wipe_status_related::WipeStatus;
 
 // identical signature to std::fs::write for parity
 pub(crate) fn write_atomic<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> std::io::Result<()> {
