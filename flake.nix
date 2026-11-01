@@ -89,8 +89,8 @@
         outPkgs = {
           # "pkgs.pkgsCross" from https://www.google.com/search?q=rustplatform+buildrustpackage+specify+output+platform
           # "pkgs.pkgsCross.mingwW64" from https://www.google.com/search?q=nixos+pkgscross+rust+x86_64-pc-windows-gnu
-          #x86_64-linux = buildAllPlatformsNativePkgs.rustPlatform.buildRustPackage (makeRustPackageParams {});
-          #x86-linux = buildAllPlatformsNativePkgs.pkgsCross.gnu32.rustPlatform.buildRustPackage (makeRustPackageParams {});
+          x86_64-linux = buildAllPlatformsNativePkgs.rustPlatform.buildRustPackage (makeRustPackageParams {});
+          x86-linux = buildAllPlatformsNativePkgs.pkgsCross.gnu32.rustPlatform.buildRustPackage (makeRustPackageParams {});
           x86_64-windows = buildAllPlatformsNativePkgs.pkgsCross.mingwW64.rustPlatform.buildRustPackage (makeRustPackageParams {});
           x86-windows = buildAllPlatformsNativePkgs.pkgsCross.mingw32.rustPlatform.buildRustPackage (makeRustPackageParams {
             # https://discourse.nixos.org/t/trying-to-cross-compile-to-i686-pc-windows-gnu/76237/18
