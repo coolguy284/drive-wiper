@@ -1,6 +1,14 @@
+use std::error::Error;
+use std::fs::{File, metadata};
+use std::io::SeekFrom;
+use std::path::Path;
+
 // https://stackoverflow.com/questions/51821451/how-to-use-a-crate-only-for-a-given-platform/51821632#51821632
 #[cfg(target_os = "windows")]
 use windows_drives::{HarddiskVolume, PhysicalDrive};
+
+#[cfg(target_os = "windows")]
+use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
 
 #[cfg(target_os = "windows")]
 enum DriveFileBacking {
@@ -24,6 +32,8 @@ impl DriveFile {
     
     #[cfg(target_os = "windows")]
     {
+        use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
+
       if let Some(regex_captures) = PHYSICAL_DRIVE_WIN_REGEX.captures(&path_processed) {
         if let Some(regex_match) = regex_captures.get(1) {
           let drive_index = regex_match.as_str().parse::<u8>()?;

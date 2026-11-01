@@ -1,3 +1,9 @@
+use std::error::Error;
+
+use crate::errors::WipeStatusConvertError;
+use crate::structs::drive_file::DriveFile;
+use crate::structs::file_offset::FileOffset;
+
 #[derive(Debug, Clone)]
 pub(crate) enum WipeStartingParams {
   ResumeStatusFile {

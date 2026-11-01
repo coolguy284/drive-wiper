@@ -1,3 +1,5 @@
+use std::{fmt::Display, io::SeekFrom};
+
 #[derive(Debug, Clone)]
 pub(crate) enum FileOffset {
   Start(u64),
