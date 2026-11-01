@@ -12,5 +12,8 @@ atomic-write-file = "0.3.1"
 cli-prompts = "0.1.1"
 json = "0.12.4"
 regex = "1.13.1"
+
+# https://stackoverflow.com/questions/51821451/how-to-use-a-crate-only-for-a-given-platform/51821632#51821632
+[target.'cfg(target_os = "windows")'.dependencies]
 #windows-drives = "0.5.0"
 windows-drives = { path = "windows-drives" }
