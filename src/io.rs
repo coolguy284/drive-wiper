@@ -105,7 +105,7 @@ pub(crate) fn read_status(status_storage_file_path: &str) -> Result<Option<WipeS
   }))
 }
 
-pub(crate) fn write_status(status: &WipeStatus, status_storage_file_path: &str, status_file_write_sync: bool) -> Result<(), Box<dyn Error>> {
+pub(crate) fn write_status(status: &WipeStatus, status_storage_file_path: &str) -> Result<(), Box<dyn Error>> {
   let data_json = object! {
     version: STATUS_VERSION,
     drive: status.drive.clone(),

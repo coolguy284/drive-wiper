@@ -89,7 +89,6 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         start_offset,
         end_offset,
         drive_write_sync,
-        status_file_write_sync,
         ..
       } => {
         let original_start_offset_from_start = status.start_offset.to_start_offset(status.drive_size);
@@ -107,7 +106,6 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         status.start_offset = start_offset;
         status.end_offset = end_offset;
         status.drive_write_sync = drive_write_sync;
-        status.status_file_write_sync = status_file_write_sync;
         
         status
       },
@@ -249,12 +247,12 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     
     status.current_offset = iteration.end_offset;
     
-    write_status(&status, status_storage_file_path.as_str(), status.status_file_write_sync)?;
+    write_status(&status, status_storage_file_path.as_str())?;
   }
   
   status.finished = true;
   
-  write_status(&status, status_storage_file_path.as_str(), status.status_file_write_sync)?;
+  write_status(&status, status_storage_file_path.as_str())?;
   
   Ok(())
 }

@@ -20,7 +20,6 @@ pub(crate) enum WipeStartingParams {
     start_offset: FileOffset,
     end_offset: FileOffset,
     drive_write_sync: bool,
-    status_file_write_sync: bool,
   },
 }
 
@@ -30,7 +29,6 @@ pub(crate) struct WipeStatus {
   pub(crate) start_offset: FileOffset,
   pub(crate) end_offset: FileOffset,
   pub(crate) drive_write_sync: bool,
-  pub(crate) status_file_write_sync: bool,
   pub(crate) drive_size: u64,
   pub(crate) current_offset: u64,
   pub(crate) finished: bool,
@@ -49,7 +47,6 @@ impl WipeStartingParams {
         start_offset,
         end_offset,
         drive_write_sync,
-        status_file_write_sync,
         ..
       } => {
         let drive_size = DriveFile::get_drive_size(drive)?;
@@ -60,7 +57,6 @@ impl WipeStartingParams {
           start_offset: start_offset.to_owned(),
           end_offset: end_offset.to_owned(),
           drive_write_sync: drive_write_sync.to_owned(),
-          status_file_write_sync: status_file_write_sync.to_owned(),
           drive_size,
           current_offset: start_offset.to_start_offset(drive_size),
           finished: false,
