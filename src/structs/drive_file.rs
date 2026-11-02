@@ -28,12 +28,10 @@ pub(crate) struct DriveFile {
 
 impl DriveFile {
   pub(crate) fn open<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
-    let path_processed = path.as_ref().to_string_lossy();
-    
     #[cfg(target_os = "windows")]
     {
-        use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
-
+      let path_processed = path.as_ref().to_string_lossy();
+      
       if let Some(regex_captures) = PHYSICAL_DRIVE_WIN_REGEX.captures(&path_processed) {
         if let Some(regex_match) = regex_captures.get(1) {
           let drive_index = regex_match.as_str().parse::<u8>()?;
