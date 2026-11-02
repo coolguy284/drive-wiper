@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
       status_storage_file_path: prgm_args[2].clone(),
       drive: prgm_args[1].clone(),
     };
-  } else if prgm_args.len() == 8 {
+  } else if prgm_args.len() == 10 {
     let chunk_size = prgm_args[2].clone().parse::<u64>()?;
     let start_offset_basis = prgm_args[3].clone();
     let start_offset = prgm_args[4].clone().parse::<u64>()?;
@@ -58,11 +58,21 @@ fn main() -> Result<(), Box<dyn Error>> {
         "end" => FileOffset::End(end_offset),
         _ => return Err(Box::new(ArgFormatError{ arg_index: 5 })),
       },
+      drive_write_sync: match prgm_args[8].as_str() {
+        "yes" => true,
+        "no" => false,
+        _ => return Err(Box::new(ArgFormatError{ arg_index: 8 })),
+      },
+      status_file_write_sync: match prgm_args[9].as_str() {
+        "yes" => true,
+        "no" => false,
+        _ => return Err(Box::new(ArgFormatError{ arg_index: 9 })),
+      },
     };
   } else {
     println!("Usage:");
     println!("  New wipe:");
-    println!("    drive-wiper <drive> <chunk size> <start offset basis> <start offset> <end offset basis> <end offset> <status storage file>");
+    println!("    drive-wiper <drive> <chunk size> <start offset basis> <start offset> <end offset basis> <end offset> <status storage file> <sync writes to drive> <sync writes to status file>");
     println!("    (Both end and start index are inclusive)");
     println!("  Resuming from previous wipe:");
     println!("    drive-wiper <status storage file>");
