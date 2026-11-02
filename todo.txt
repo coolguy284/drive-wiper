@@ -1,0 +1,10 @@
+low prio:
+proper cli arg parsing
+multiple erase steps, each being one of several modes (default is write zeros if nonzero data found for hdd, and ioctl trim for ssd):
+  write zeros always
+  write zeros if nonzero data found
+  write ones always
+  write ones if nonone data found
+  write random always
+  write random if non matching data found
+  ioctl support to instantly trim an ssd
