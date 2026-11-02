@@ -4,6 +4,7 @@ use regex::Regex;
 
 pub(crate) const STATUS_VERSION: u64 = 1;
 pub(crate) const STATUS_JSON_INDENT: u16 = 2;
+pub(crate) const AVERAGE_SPEED_SAMPLE_COUNT: usize = 10;
 
 // https://stackoverflow.com/questions/27791532/how-do-i-create-a-global-mutable-singleton/27826181#27826181
 #[cfg(target_os = "windows")]

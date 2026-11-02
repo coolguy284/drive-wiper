@@ -1,9 +1,12 @@
 use std::error::Error;
+use std::intrinsics::floorf64;
 use std::io::SeekFrom;
+use std::time::{Duration, Instant};
 
 use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
 
+use crate::consts::AVERAGE_SPEED_SAMPLE_COUNT;
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, StartOffsetLoweredError, WipeCancelledError};
 use crate::io::{read_status, write_status};
 use crate::structs::drive_file::DriveFile;
@@ -33,6 +36,20 @@ fn is_zero(data: &[u8]) -> bool {
   }
   
   true
+}
+
+fn format_time(time: f64) -> String {
+  if time < 0.0 {
+    format!("-{}", format_time(-time))
+  } else if time < 60.0 {
+    format!("{}s", time)
+  } else if time < 60.0 * 60.0 {
+    format!("{}m {}s", f64::floor(time / 60.0), time % 60.0)
+  } else if time < 24.0 * 60.0 * 60.0 {
+    format!("{}h {}m {}s", f64::floor(time / (60.0 * 60.0)), f64::floor(time / 60.0 % 60.0), time % 60.0)
+  } else {
+    format!("{}d {}h {}m {}s", f64::floor(time / (24.0 * 60.0 * 60.0)), f64::floor(time / (60.0 * 60.0) % 24.0), f64::floor(time / 60.0 % 60.0), time % 60.0)
+  }
 }
 
 pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn Error>> {
@@ -152,10 +169,40 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     }))
   }
   
-  let end_offset_string = format!("{}", status.end_offset.to_start_offset(drive_length));
+  let end_offset = status.end_offset.to_start_offset(drive_length);
+  
+  let end_offset_string = format!("{}", end_offset);
+  
+  let past_instant;
+  let current_instant;
+  let duration_samples: [Duration; AVERAGE_SPEED_SAMPLE_COUNT];
+  let byte_samples: [u64; AVERAGE_SPEED_SAMPLE_COUNT];
+  let sample_index = 0;
+  let duration_sum = Duration::ZERO;
+  let bytes_sum = 0;
   
   for iteration in status.get_iterator() {
-    print!("Checking bytes {1:00$}-{2:00$}/{3}: ", end_offset_string.len(), iteration.start_offset, iteration.end_offset - 1, end_offset_string);
+    past_instant = current_instant;
+    current_instant = Instant::now();
+    
+    let elapsed_time = current_instant - past_instant;
+    
+    duration_sum -= duration_samples[sample_index];
+    bytes_sum -= byte_samples[sample_index];
+    
+    duration_samples[sample_index] = elapsed_time;
+    byte_samples[sample_index] = iteration.length;
+    
+    duration_sum += duration_samples[sample_index];
+    bytes_sum += byte_samples[sample_index];
+    
+    sample_index += 1;
+    sample_index %= AVERAGE_SPEED_SAMPLE_COUNT;
+    
+    let data_rate = (bytes_sum as f64) / duration_sum.as_secs_f64();
+    let time_left = ((end_offset - iteration.start_offset) as f64) / data_rate;
+    
+    print!("Checking bytes {1:00$}-{2:00$}/{3} {4} B/s, {5} left: ", end_offset_string.len(), iteration.start_offset, iteration.end_offset - 1, end_offset_string, data_rate, format_time(time_left));
     
     let mut data: Vec<u8> = vec![];
     
