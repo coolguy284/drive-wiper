@@ -210,9 +210,11 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         let eta = Local::now() + TimeDelta::milliseconds((time_left * 1000.0) as i64);
         
         format!(
-          " {:.0} B/s, ETA {}, {} left",
+          " {:.0} B/s, ETA {}{} {}, {} left",
           data_rate,
-          eta.format("%x %X%.1f %:z"),
+          eta.format("%x %X."),
+          eta.timestamp_subsec_millis() / 100,
+          eta.format("%:z"),
           format_time(time_left),
         )
       } else {
