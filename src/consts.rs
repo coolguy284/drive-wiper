@@ -1,6 +1,7 @@
 #[cfg(target_os = "windows")]
 use std::sync::LazyLock;
 
+#[cfg(target_os = "windows")]
 use regex::Regex;
 
 pub(crate) const STATUS_VERSION: u64 = 2;
