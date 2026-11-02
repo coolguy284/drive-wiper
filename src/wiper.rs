@@ -43,11 +43,11 @@ fn format_time(time: f64) -> String {
   } else if time < 60.0 {
     format!("{:.1}s", time)
   } else if time < 60.0 * 60.0 {
-    format!("{:.0}m {:.1}s", f64::floor(time / 60.0), time % 60.0)
+    format!("{:.0}m {:02.1}s", f64::floor(time / 60.0), time % 60.0)
   } else if time < 24.0 * 60.0 * 60.0 {
-    format!("{:.0}h {:.0}m {:.1}s", f64::floor(time / (60.0 * 60.0)), f64::floor(time / 60.0 % 60.0), time % 60.0)
+    format!("{:.0}h {:02.0}m {:02.1}s", f64::floor(time / (60.0 * 60.0)), f64::floor(time / 60.0 % 60.0), time % 60.0)
   } else {
-    format!("{:.0}d {:.0}h {:.0}m {:.1}s", f64::floor(time / (24.0 * 60.0 * 60.0)), f64::floor(time / (60.0 * 60.0) % 24.0), f64::floor(time / 60.0 % 60.0), time % 60.0)
+    format!("{:.0}d {:02.0}h {:02.0}m {:02.1}s", f64::floor(time / (24.0 * 60.0 * 60.0)), f64::floor(time / (60.0 * 60.0) % 24.0), f64::floor(time / 60.0 % 60.0), time % 60.0)
   }
 }
 
