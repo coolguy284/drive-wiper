@@ -137,6 +137,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   println!("Chunk Size: {} B", status.chunk_size);
   println!("Start Offset: {} B", status.start_offset);
   println!("End Offset: {} B", status.end_offset);
+  println!("Use Sync Writes for Drive: {} B", status.drive_write_sync);
   println!("Drive Size: {} B", status.drive_size);
   println!("Current Offset: {} B", status.current_offset);
   println!("Finished: {}", status.finished);
