@@ -155,6 +155,7 @@ pub(crate) fn write_status(status: &WipeStatus, status_storage_file_path: &str) 
     chunk_size: status.chunk_size,
     start_offset: offset_to_json(status.start_offset.clone()),
     end_offset: offset_to_json(status.end_offset.clone()),
+    drive_write_sync: status.drive_write_sync,
     drive_size: status.drive_size,
     current_offset: status.current_offset,
     finished: status.finished,
