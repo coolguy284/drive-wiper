@@ -23,6 +23,16 @@ pub(crate) enum WipeStartingParams {
   },
 }
 
+pub(crate) struct WipeStatusV1 {
+  pub(crate) drive: String,
+  pub(crate) chunk_size: u64,
+  pub(crate) start_offset: FileOffset,
+  pub(crate) end_offset: FileOffset,
+  pub(crate) drive_size: u64,
+  pub(crate) current_offset: u64,
+  pub(crate) finished: bool,
+}
+
 pub(crate) struct WipeStatus {
   pub(crate) drive: String,
   pub(crate) chunk_size: u64,
