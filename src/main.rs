@@ -1,12 +1,14 @@
 use std::env::args_os;
 use std::error::Error;
-use std::sync::LazyLock;
 
 use crate::args::decode_prgm_args;
 use crate::errors::ArgFormatError;
 use crate::structs::file_offset::FileOffset;
 use crate::structs::wipe_status_related::WipeStartingParams;
 use crate::wiper::wipe_drive;
+
+#[cfg(target_os = "windows")]
+use std::sync::LazyLock;
 
 #[cfg(target_os = "windows")]
 use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};

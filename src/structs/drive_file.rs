@@ -64,13 +64,21 @@ impl DriveFile {
   }
   
   pub(crate) fn get_drive_size<P: AsRef<Path>>(path: P) -> Result<u64, Box<dyn Error>> {
-    let path_processed = path.as_ref().to_string_lossy();
+    #[cfg(target_os = "windows")]
+    {
+      let path_string = path.as_ref().to_string_lossy();
+      
+      if let Some(_regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_string) {
+        Self::open(path)?.size()
+      } else if let Some(_regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_string) {
+        Self::open(path)?.size()
+      } else {
+        Ok(metadata(path)?.len())
+      }
+    }
     
-    if let Some(_regex_match) = PHYSICAL_DRIVE_WIN_REGEX.find(&path_processed) {
-      Self::open(path)?.size()
-    } else if let Some(_regex_match) = DRIVE_PARTITION_WIN_REGEX.find(&path_processed) {
-      Self::open(path)?.size()
-    } else {
+    #[cfg(not(target_os = "windows"))]
+    {
       Ok(metadata(path)?.len())
     }
   }
