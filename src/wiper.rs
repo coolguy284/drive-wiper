@@ -152,8 +152,10 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     }))
   }
   
+  let end_offset_string = format!("{}", status.end_offset.to_start_offset(drive_length));
+  
   for iteration in status.get_iterator() {
-    print!("Checking bytes {}-{}/{}: ", iteration.start_offset, iteration.end_offset - 1, status.end_offset.to_start_offset(drive_length) - 1);
+    print!("Checking bytes {1:00$}-{2:00$}/{3}: ", end_offset_string.len(), iteration.start_offset, iteration.end_offset - 1, end_offset_string);
     
     let mut data: Vec<u8> = vec![];
     
