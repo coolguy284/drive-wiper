@@ -30,9 +30,9 @@ impl DriveFile {
   pub(crate) fn open<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
     #[cfg(target_os = "windows")]
     {
-      let path_processed = path.as_ref().to_string_lossy();
+      let path_string = path.as_ref().to_string_lossy();
       
-      if let Some(regex_captures) = PHYSICAL_DRIVE_WIN_REGEX.captures(&path_processed) {
+      if let Some(regex_captures) = PHYSICAL_DRIVE_WIN_REGEX.captures(&path_string) {
         if let Some(regex_match) = regex_captures.get(1) {
           let drive_index = regex_match.as_str().parse::<u8>()?;
           
@@ -42,7 +42,7 @@ impl DriveFile {
         }
       }
       
-      if let Some(regex_captures) = DRIVE_PARTITION_WIN_REGEX.captures(&path_processed) {
+      if let Some(regex_captures) = DRIVE_PARTITION_WIN_REGEX.captures(&path_string) {
         if let Some(regex_match) = regex_captures.get(1) {
           let partition_index = regex_match.as_str().parse::<u8>()?;
           
