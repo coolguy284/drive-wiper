@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::intrinsics::floorf64;
 use std::io::SeekFrom;
 use std::time::{Duration, Instant};
 
@@ -173,11 +172,11 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   
   let end_offset_string = format!("{}", end_offset);
   
-  let mut past_instant = None;
+  let mut past_instant;
   let mut current_instant = None;
-  let duration_samples: [Duration; AVERAGE_SPEED_SAMPLE_COUNT];
-  let byte_samples: [u64; AVERAGE_SPEED_SAMPLE_COUNT];
-  let sample_index = 0;
+  let mut duration_samples = [Duration::ZERO; AVERAGE_SPEED_SAMPLE_COUNT];
+  let mut byte_samples = [0; AVERAGE_SPEED_SAMPLE_COUNT];
+  let mut sample_index = 0;
   let mut duration_sum = Duration::ZERO;
   let mut bytes_sum = 0;
   
