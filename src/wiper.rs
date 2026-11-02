@@ -211,7 +211,14 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
       "".to_string()
     };
     
-    print!("Checking bytes {1:00$}-{2:00$}/{3}{4}: ", end_offset_string.len(), iteration.start_offset, iteration.end_offset - 1, end_offset_string, rate_string);
+    print!(
+      "Checking bytes {1:00$}-{2:00$}/{3}{4}: ",
+      end_offset_string.len(),
+      iteration.start_offset,
+      iteration.end_offset - 1,
+      end_offset_string,
+      rate_string,
+    );
     
     let mut data: Vec<u8> = vec![];
     
