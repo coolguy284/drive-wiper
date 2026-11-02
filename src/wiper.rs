@@ -212,7 +212,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         format!(
           " {:.0} B/s, ETA {}{} {}, {} left",
           data_rate,
-          eta.format("%x %X."),
+          eta.format("%F %X."),
           eta.timestamp_subsec_millis() / 100,
           eta.format("%:z"),
           format_time(time_left),
