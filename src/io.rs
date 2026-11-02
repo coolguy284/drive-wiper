@@ -139,8 +139,8 @@ pub(crate) fn read_status(status_storage_file_path: &str) -> Result<Option<WipeS
   let Some(version) = data_json["version"].as_u64() else { return Err(Box::new(StatusFormatError)) };
   
   match version {
-    1 => convert_status_v1_to_v2(read_status_v1(status)?),
-    STATUS_VERSION => read_status_v2(status)?,
+    1 => Ok(Some(convert_status_v1_to_v2(read_status_v1(data_json)?))),
+    STATUS_VERSION => Ok(Some(read_status_v2(data_json)?)),
     _ => Err(Box::new(StatusVersionError {
       expected_ver: STATUS_VERSION,
       actual_ver: version,
