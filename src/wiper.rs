@@ -2,6 +2,7 @@ use std::error::Error;
 use std::io::SeekFrom;
 use std::time::{Duration, Instant};
 
+use chrono::{Local, TimeDelta};
 use cli_prompts::DisplayPrompt;
 use cli_prompts::prompts::Confirmation;
 
@@ -206,8 +207,9 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         
         let data_rate = (bytes_sum as f64) / duration_sum.as_secs_f64();
         let time_left = (((end_offset + 1) - iteration.start_offset) as f64) / data_rate;
+        let eta = Local::now() + TimeDelta::milliseconds((time_left * 1000.0) as i64);
         
-        format!(" {:.0} B/s, {} left", data_rate, format_time(time_left))
+        format!(" {:.0} B/s, {} left, ETA {}", data_rate, format_time(time_left), eta)
       } else {
         "".to_string()
       }
