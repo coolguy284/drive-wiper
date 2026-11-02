@@ -203,7 +203,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         let data_rate = (bytes_sum as f64) / duration_sum.as_secs_f64();
         let time_left = ((end_offset - iteration.start_offset) as f64) / data_rate;
         
-        format!(" {} B/s, {} left", data_rate, format_time(time_left))
+        format!(" {:.0} B/s, {} left", data_rate, format_time(time_left))
       } else {
         "".to_string()
       }
