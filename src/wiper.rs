@@ -173,36 +173,46 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   
   let end_offset_string = format!("{}", end_offset);
   
-  let past_instant;
-  let current_instant;
+  let mut past_instant = None;
+  let mut current_instant = None;
   let duration_samples: [Duration; AVERAGE_SPEED_SAMPLE_COUNT];
   let byte_samples: [u64; AVERAGE_SPEED_SAMPLE_COUNT];
   let sample_index = 0;
-  let duration_sum = Duration::ZERO;
-  let bytes_sum = 0;
+  let mut duration_sum = Duration::ZERO;
+  let mut bytes_sum = 0;
   
   for iteration in status.get_iterator() {
     past_instant = current_instant;
-    current_instant = Instant::now();
+    current_instant = Some(Instant::now());
     
-    let elapsed_time = current_instant - past_instant;
+    let rate_string = if let Some(past_instant_value) = past_instant {
+      if let Some(current_instant_value) = current_instant {
+        let elapsed_time = current_instant_value - past_instant_value;
+        
+        duration_sum -= duration_samples[sample_index];
+        bytes_sum -= byte_samples[sample_index];
+        
+        duration_samples[sample_index] = elapsed_time;
+        byte_samples[sample_index] = iteration.length;
+        
+        duration_sum += duration_samples[sample_index];
+        bytes_sum += byte_samples[sample_index];
+        
+        sample_index += 1;
+        sample_index %= AVERAGE_SPEED_SAMPLE_COUNT;
+        
+        let data_rate = (bytes_sum as f64) / duration_sum.as_secs_f64();
+        let time_left = ((end_offset - iteration.start_offset) as f64) / data_rate;
+        
+        format!(" {} B/s, {} left", data_rate, format_time(time_left))
+      } else {
+        "".to_string()
+      }
+    } else {
+      "".to_string()
+    };
     
-    duration_sum -= duration_samples[sample_index];
-    bytes_sum -= byte_samples[sample_index];
-    
-    duration_samples[sample_index] = elapsed_time;
-    byte_samples[sample_index] = iteration.length;
-    
-    duration_sum += duration_samples[sample_index];
-    bytes_sum += byte_samples[sample_index];
-    
-    sample_index += 1;
-    sample_index %= AVERAGE_SPEED_SAMPLE_COUNT;
-    
-    let data_rate = (bytes_sum as f64) / duration_sum.as_secs_f64();
-    let time_left = ((end_offset - iteration.start_offset) as f64) / data_rate;
-    
-    print!("Checking bytes {1:00$}-{2:00$}/{3} {4} B/s, {5} left: ", end_offset_string.len(), iteration.start_offset, iteration.end_offset - 1, end_offset_string, data_rate, format_time(time_left));
+    print!("Checking bytes {1:00$}-{2:00$}/{3}{4}: ", end_offset_string.len(), iteration.start_offset, iteration.end_offset - 1, end_offset_string, rate_string);
     
     let mut data: Vec<u8> = vec![];
     
