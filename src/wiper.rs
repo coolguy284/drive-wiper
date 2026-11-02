@@ -210,7 +210,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
         let eta = Local::now() + TimeDelta::milliseconds((time_left * 1000.0) as i64);
         
         format!(
-          " {:.0} B/s, ETA {}{} {}, {} left",
+          ", {:.0} B/s, ETA {}{} {}, {} left",
           data_rate,
           eta.format("%F %T."),
           eta.timestamp_subsec_millis() / 100,
@@ -227,7 +227,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     let progress = ((iteration.start_offset - start_offset) as f64) / (((end_offset + 1) - start_offset) as f64);
     
     print!(
-      "Checking bytes {1:00$}-{2:00$}/{3} ({4:09.6}%){5}: ",
+      "Checking {1:00$}-{2:00$}/{3} B ({4:09.6}%){5}: ",
       end_offset_string.len(),
       iteration.start_offset,
       iteration.end_offset - 1,
