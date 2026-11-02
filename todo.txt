@@ -8,3 +8,4 @@ multiple erase steps, each being one of several modes (default is write zeros if
   write random always
   write random if non matching data found
   ioctl support to instantly trim an ssd
+handle sigints / sigterms and stop after one operation instead of stopping mid operation
