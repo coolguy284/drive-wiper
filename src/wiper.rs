@@ -218,12 +218,12 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
     let progress = ((iteration.start_offset - start_offset) as f64) / (((end_offset + 1) - start_offset) as f64);
     
     print!(
-      "Checking bytes {1:00$}-{2:00$}/{3} ({4:08.6}%){5}: ",
+      "Checking bytes {1:00$}-{2:00$}/{3} ({4:09.6}%){5}: ",
       end_offset_string.len(),
       iteration.start_offset,
       iteration.end_offset - 1,
       end_offset_string,
-      progress,
+      progress * 100.0,
       rate_string,
     );
     
