@@ -1,3 +1,4 @@
+use core::array::from_fn;
 use std::ops::{AddAssign, SubAssign};
 
 use num::Zero;
@@ -12,7 +13,7 @@ struct SumTracker<T: Clone + AddAssign + SubAssign + Zero, const data_point_leng
 impl<T: Clone + AddAssign + SubAssign + Zero, const data_point_length: usize> SumTracker<T, data_point_length> {
   fn new() -> Self {
     SumTracker {
-      data_points: [T::zero(); data_point_length],
+      data_points: from_fn(|_| T::zero()),
       data_point_index: 0,
       sum: T::zero(),
     }
