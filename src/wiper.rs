@@ -173,7 +173,7 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   }
   
   let start_offset = status.start_offset.to_start_offset(drive_length);
-  let end_offset = status.end_offset.to_start_offset(drive_length);
+  let end_offset = status.end_offset.to_start_offset(drive_length) - 1;
   
   let end_offset_string = format!("{}", end_offset);
   
