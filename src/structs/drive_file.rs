@@ -37,7 +37,7 @@ impl DriveFile {
           let drive_index = regex_match.as_str().parse::<u8>()?;
           
           return Ok(DriveFile {
-            backing: DriveFileBacking::Disk(PhysicalDrive::open(drive_index)?),
+            backing: DriveFileBacking::Disk(PhysicalDrive::open(drive_index, true, true)?),
           })
         }
       }
@@ -47,7 +47,7 @@ impl DriveFile {
           let partition_index = regex_match.as_str().parse::<u8>()?;
           
           return Ok(DriveFile {
-            backing: DriveFileBacking::Partition(HarddiskVolume::open(partition_index)?),
+            backing: DriveFileBacking::Partition(HarddiskVolume::open(partition_index, true, true)?),
           })
         }
       }

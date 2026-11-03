@@ -111,9 +111,9 @@ impl PhysicalDrive {
     /// or an error occures while opening the drive.
     /// If an error occurs, an error message containing the error number is returned, see
     /// [here](https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes) for a list.
-    pub fn open(drive_num: u8) -> Result<Self, String> {
+    pub fn open(drive_num: u8, read: bool, write: bool) -> Result<Self, String> {
         let path = format!("\\\\.\\PhysicalDrive{}", drive_num);
-        let handle = open_handle(&path)?;
+        let handle = open_handle(&path, read, write)?;
         Ok(PhysicalDrive {
             handle,
             geometry: geometry(&handle)?,
@@ -135,9 +135,9 @@ impl HarddiskVolume {
     /// or an error occures while opening the volume.
     /// If an error occurs, an error message containing the error number is returned, see
     /// [here](https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes) for a list.
-    pub fn open(volume_num: u8) -> Result<Self, String> {
+    pub fn open(volume_num: u8, read: bool, write: bool) -> Result<Self, String> {
         let path = format!("\\\\?\\HarddiskVolume{}", volume_num);
-        let handle = open_handle(&path)?;
+        let handle = open_handle(&path, read, write)?;
         Ok(HarddiskVolume {
             handle,
             geometry: geometry(&handle)?,
@@ -162,8 +162,8 @@ impl BufferedPhysicalDrive {
     /// or an error occures while opening the drive.
     /// If an error occurs, an error message containing the error number is returned, see
     /// [here](https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes) for a list.
-    pub fn open(drive_num: u8) -> Result<Self, String> {
-        let mut drive = PhysicalDrive::open(drive_num)?;
+    pub fn open(drive_num: u8, read: bool, write: bool) -> Result<Self, String> {
+        let mut drive = PhysicalDrive::open(drive_num, read, write)?;
         let mut sector = vec![0; drive.geometry.bytes_per_sector as usize];
         match drive.read(&mut sector) {
             Ok(_) => (),
@@ -193,8 +193,8 @@ impl BufferedHarddiskVolume {
     /// or an error occures while opening the colume.
     /// If an error occurs, an error message containing the error number is returned, see
     /// [here](https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes) for a list.
-    pub fn open(volume_num: u8) -> Result<Self, String> {
-        let mut volume = HarddiskVolume::open(volume_num)?;
+    pub fn open(volume_num: u8, read: bool, write: bool) -> Result<Self, String> {
+        let mut volume = HarddiskVolume::open(volume_num, read, write)?;
         let mut sector = vec![0; volume.geometry.bytes_per_sector as usize];
         match volume.read(&mut sector) {
             Ok(_) => (),
@@ -257,12 +257,12 @@ impl From<PARTITION_INFORMATION_EX> for PartitionInfo {
     }
 }
 
-fn open_handle(path: &str) -> Result<HANDLE, String> {
+fn open_handle(path: &str, read: bool, write: bool) -> Result<HANDLE, String> {
     let path = win32::win32_string(&path);
     let handle = unsafe {
         fs::CreateFileW(
             path.as_ptr(),
-            GENERIC_READ | GENERIC_WRITE,
+            (read as u32) * GENERIC_READ | (write as u32) * GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             null_mut(),
             OPEN_EXISTING,
