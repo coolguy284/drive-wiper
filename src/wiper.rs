@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::io::SeekFrom;
-use std::iter::Sum;
 use std::time::{Duration, Instant};
 
 use chrono::{Local, TimeDelta};
@@ -13,7 +12,6 @@ use crate::io::{read_status, write_status};
 use crate::structs::drive_file::DriveFile;
 use crate::structs::sum_tracker::SumTracker;
 use crate::structs::wipe_status_related::WipeStartingParams;
-
 
 fn is_zero(data: &[u8]) -> bool {
   // https://stackoverflow.com/questions/65367552/how-to-efficiently-check-a-vecu8-to-see-if-its-all-zeros/65376133#65376133
