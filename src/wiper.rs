@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::io::SeekFrom;
+use std::iter::Sum;
 use std::time::{Duration, Instant};
 
 use chrono::{Local, TimeDelta};
@@ -10,7 +11,9 @@ use crate::consts::AVERAGE_SPEED_SAMPLE_COUNT;
 use crate::errors::{DriveIncorrectSizeError, ParamsNotSpecifiedError, PromptAbortedError, StartOffsetLoweredError, WipeCancelledError};
 use crate::io::{read_status, write_status};
 use crate::structs::drive_file::DriveFile;
+use crate::structs::sum_tracker::SumTracker;
 use crate::structs::wipe_status_related::WipeStartingParams;
+
 
 fn is_zero(data: &[u8]) -> bool {
   // https://stackoverflow.com/questions/65367552/how-to-efficiently-check-a-vecu8-to-see-if-its-all-zeros/65376133#65376133
@@ -179,11 +182,8 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
   
   let mut past_instant;
   let mut current_instant = None;
-  let mut duration_samples = [Duration::ZERO; AVERAGE_SPEED_SAMPLE_COUNT];
-  let mut byte_samples = [0; AVERAGE_SPEED_SAMPLE_COUNT];
-  let mut sample_index = 0;
-  let mut duration_sum = Duration::ZERO;
-  let mut bytes_sum = 0;
+  let mut duration_sum: SumTracker<Duration, AVERAGE_SPEED_SAMPLE_COUNT> = SumTracker::new();
+  let mut bytes_sum: SumTracker<u64, AVERAGE_SPEED_SAMPLE_COUNT> = SumTracker::new();
   
   for iteration in status.get_iterator() {
     past_instant = current_instant;
@@ -193,19 +193,10 @@ pub(crate) fn wipe_drive(start_params: WipeStartingParams) -> Result<(), Box<dyn
       if let Some(current_instant_value) = current_instant {
         let elapsed_time = current_instant_value - past_instant_value;
         
-        duration_sum -= duration_samples[sample_index];
-        bytes_sum -= byte_samples[sample_index];
+        duration_sum.add_data(elapsed_time);
+        bytes_sum.add_data(iteration.length);
         
-        duration_samples[sample_index] = elapsed_time;
-        byte_samples[sample_index] = iteration.length;
-        
-        duration_sum += duration_samples[sample_index];
-        bytes_sum += byte_samples[sample_index];
-        
-        sample_index += 1;
-        sample_index %= AVERAGE_SPEED_SAMPLE_COUNT;
-        
-        let data_rate = (bytes_sum as f64) / duration_sum.as_secs_f64();
+        let data_rate = (bytes_sum.get_sum() as f64) / duration_sum.get_sum().as_secs_f64();
         let time_left = (((end_offset + 1) - iteration.start_offset) as f64) / data_rate;
         let eta = Local::now() + TimeDelta::milliseconds((time_left * 1000.0) as i64);
         

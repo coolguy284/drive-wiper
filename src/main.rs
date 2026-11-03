@@ -13,11 +13,12 @@ use std::sync::LazyLock;
 #[cfg(target_os = "windows")]
 use crate::consts::{DRIVE_PARTITION_WIN_REGEX, PHYSICAL_DRIVE_WIN_REGEX};
 
-mod args;
 mod consts;
 mod errors;
-mod io;
 mod structs;
+mod traits;
+mod args;
+mod io;
 mod wiper;
 
 fn main() -> Result<(), Box<dyn Error>> {

@@ -1,7 +1,7 @@
 use core::array::from_fn;
 use std::ops::{AddAssign, SubAssign};
 
-use num::Zero;
+use crate::traits::Zero;
 
 // Tracks sum of datapoints in a circular buffer
 // https://www.geeksforgeeks.org/rust/rust-multiple-bounds/
