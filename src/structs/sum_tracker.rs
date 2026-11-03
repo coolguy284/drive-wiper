@@ -12,6 +12,9 @@ struct SumTracker<T: Clone + AddAssign + SubAssign + Zero, const data_point_leng
 
 impl<T: Clone + AddAssign + SubAssign + Zero, const data_point_length: usize> SumTracker<T, data_point_length> {
   fn new() -> Self {
+    // https://stackoverflow.com/questions/76254481/how-do-i-limit-the-values-allowed-in-a-generic-const-parameter/76254798#76254798
+    const { assert!(data_point_length > 0, "data_point_length must be positive") };
+    
     SumTracker {
       data_points: from_fn(|_| T::zero()),
       data_point_index: 0,
