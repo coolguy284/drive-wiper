@@ -92,6 +92,17 @@
                 src = copyJoinOutput;
                 buildPhase = ''
                   mkdir -p $out${outDir}
+                  
+                  for buildOut in $(ls $src); do
+                    buildOutContents=$(ls $src/$buildOut)
+                    
+                    if [ len(buildOutContents) -eq 1 ]; then
+                      cp $src/$buildOut/$buildOutContents $out${outDir}/$buildOutContents-$buildOut
+                    else
+                      cp $src/$buildOut $out${outDir}/$buildOut
+                    fi
+                  done
+                  
                   cp -r $src $out${outDir}
                 '';
               };
