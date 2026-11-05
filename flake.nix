@@ -96,8 +96,10 @@
                   for buildOut in $(ls $src); do
                     buildOutContents=$(ls $src/$buildOut)
                     
-                    if [ len(buildOutContents) -eq 1 ]; then
-                      cp $src/$buildOut/$buildOutContents $out${outDir}/$buildOutContents-$buildOut
+                    $buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
+                    
+                    if [ ''${#buildOutContents} -eq 1 ]; then
+                      cp $src/$buildOut/$buildOutContents $out${outDir}/$buildOutContents-$buildOutReversedOrder
                     else
                       cp $src/$buildOut $out${outDir}/$buildOut
                     fi
