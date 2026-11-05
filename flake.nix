@@ -90,6 +90,9 @@
               buildAllPlatformsNativePkgs.stdenv.mkDerivation {
                 inherit name;
                 src = copyJoinOutput;
+                nativeBuildInputs = [
+                  buildAllPlatformsNativePkgs.zip
+                ];
                 buildPhase = ''
                   mkdir -p $out${outDir}
                   
@@ -106,6 +109,7 @@
                       cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/$buildOutContents-$buildOutReversedOrder
                     else
                       cp -r $src/$buildOut $out${outDir}/$buildOut
+                      (cd $out${outDir}/$buildOut; zip -r ../$buildOut.zip .)
                     fi
                   done
                 '';
