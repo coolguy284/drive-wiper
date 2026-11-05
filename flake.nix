@@ -106,8 +106,17 @@
                     buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
                     
                     if [ ''${#buildOutContents[@]} -eq 1 ]; then
-                      cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/$buildOutContents-$buildOutReversedOrder
+                      # single file for that build output, rename and copy directly
+                      
+                      if [ "''${buildOutContents[0]}" != "''${buildOutContents[0]/%.exe/}" ]; then
+                        # file ends with .exe so must remove, rename, and read
+                        cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/''${buildOutContents[0]/%.exe/}-$buildOutReversedOrder.exe
+                      else
+                        # file does not end with .exe so can rename directly
+                        cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/''${buildOutContents[0]}-$buildOutReversedOrder
+                      fi
                     else
+                      # many files for that build output, convert to zip
                       (cd $src/$buildOut; zip -r $out${outDir}/${cargoFileContents.package.name}-$buildOutReversedOrder.zip .)
                     fi
                   done
