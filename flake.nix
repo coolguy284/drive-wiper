@@ -96,7 +96,7 @@
                   for buildOut in $(ls $src); do
                     buildOutContents=$(ls $src/$buildOut)
                     
-                    $buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
+                    buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
                     
                     if [ ''${#buildOutContents} -eq 1 ]; then
                       cp $src/$buildOut/$buildOutContents $out${outDir}/$buildOutContents-$buildOutReversedOrder
