@@ -108,8 +108,7 @@
                     if [ ''${#buildOutContents[@]} -eq 1 ]; then
                       cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/$buildOutContents-$buildOutReversedOrder
                     else
-                      cp -r $src/$buildOut $out${outDir}/$buildOut
-                      (cd $out${outDir}/$buildOut; zip -r ../$buildOut.zip .)
+                      (cd $src/$buildOut; zip -r $out${outDir}/$buildOut .)
                     fi
                   done
                 '';
