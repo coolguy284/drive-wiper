@@ -84,6 +84,44 @@
                   '';
                 }
               );
+          
+          makeGithubReleaseFiles =
+            { name, copyJoinOutput, outDir }:
+              buildAllPlatformsNativePkgs.stdenv.mkDerivation {
+                inherit name;
+                src = copyJoinOutput;
+                nativeBuildInputs = [
+                  buildAllPlatformsNativePkgs.zip
+                ];
+                buildPhase = ''
+                  mkdir -p $out${outDir}
+                  
+                  for buildOut in $(ls $src); do
+                    # For reference to update this code: https://www.gnu.org/software/bash/manual/bash.html#Arrays
+                    # (code not from the page its just a useful reference)
+                    buildOutContents=($(ls $src/$buildOut))
+                    
+                    # For reference to update this code: https://www.gnu.org/software/bash/manual/bash.html#Pattern-Matching
+                    # (code not from the page its just a useful reference)
+                    buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
+                    
+                    if [ ''${#buildOutContents[@]} -eq 1 ]; then
+                      # single file for that build output, rename and copy directly
+                      
+                      if [ "''${buildOutContents[0]}" != "''${buildOutContents[0]/%.exe/}" ]; then
+                        # file ends with .exe so must remove, rename, and read
+                        cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/''${buildOutContents[0]/%.exe/}-$buildOutReversedOrder.exe
+                      else
+                        # file does not end with .exe so can rename directly
+                        cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/''${buildOutContents[0]}-$buildOutReversedOrder
+                      fi
+                    else
+                      # many files for that build output, convert to zip
+                      (cd $src/$buildOut; zip -r $out${outDir}/${cargoFileContents.package.name}-$buildOutReversedOrder.zip .)
+                    fi
+                  done
+                '';
+              };
         };
         
         outPkgs = {
@@ -121,25 +159,40 @@
         {
           packages = forAllPlatforms (
             buildSystem:
-              {
-                # "pkgs.symlinkJoin" from https://www.google.com/search?q=nix+combine+multiple+derivations+into+one+big+output
-                build-all-platforms =
-                  if buildSystem == buildAllPlatformsNativeSystem then
-                    customPkgs.copyJoin {
-                      name = "build";
-                      pkgsToCombine = outPkgs;
-                      pkgSubdir = "/bin";
-                      copySymlinkContents = true;
-                    }
-                  else
-                    throw "full cross platform build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
-                
-                default = makeNativeOutPkgs buildSystem {};
-                
-                #test = makeNativeOutPkgs buildSystem {
-                #  buildType = "test";
-                #};
-              }
+              let
+                allPlatformsPackage =
+                  customPkgs.copyJoin {
+                    name = "build";
+                    pkgsToCombine = outPkgs;
+                    pkgSubdir = "/bin";
+                    copySymlinkContents = true;
+                  };
+              
+              in
+                {
+                  # "pkgs.symlinkJoin" from https://www.google.com/search?q=nix+combine+multiple+derivations+into+one+big+output
+                  build-all-platforms =
+                    if buildSystem == buildAllPlatformsNativeSystem then
+                      allPlatformsPackage
+                    else
+                      throw "full cross platform build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
+                  
+                  build-github-releases =
+                    if buildSystem == buildAllPlatformsNativeSystem then
+                      customPkgs.makeGithubReleaseFiles {
+                        name = "build-github";
+                        copyJoinOutput = allPlatformsPackage;
+                        outDir = "/bin";
+                      }
+                    else
+                      throw "full cross platform github build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
+                  
+                  default = makeNativeOutPkgs buildSystem {};
+                  
+                  #test = makeNativeOutPkgs buildSystem {
+                  #  buildType = "test";
+                  #};
+                }
           );
           
           apps = forAllPlatforms (
