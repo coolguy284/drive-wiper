@@ -87,11 +87,10 @@
           
           makeGithubReleaseFiles =
             { name, copyJoinOutput, outDir }:
-              stdenv.mkDerivation {
+              buildAllPlatformsNativePkgs.stdenv.mkDerivation {
                 inherit name;
                 src = copyJoinOutput;
               };
-            
         };
         
         outPkgs = {
