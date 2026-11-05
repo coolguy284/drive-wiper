@@ -99,7 +99,7 @@
                     buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
                     
                     if [ ''${#buildOutContents[@]} -eq 1 ]; then
-                      cp $src/$buildOut/$buildOutContents $out${outDir}/$buildOutContents-$buildOutReversedOrder
+                      cp $src/$buildOut/''${buildOutContents[0]} $out${outDir}/$buildOutContents-$buildOutReversedOrder
                     else
                       cp $src/$buildOut $out${outDir}/$buildOut
                     fi
