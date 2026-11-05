@@ -94,18 +94,16 @@
                   mkdir -p $out${outDir}
                   
                   for buildOut in $(ls $src); do
-                    buildOutContents=$(ls $src/$buildOut)
+                    buildOutContents=($(ls $src/$buildOut))
                     
                     buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
                     
-                    if [ ''${#buildOutContents} -eq 1 ]; then
+                    if [ ''${#buildOutContents[@]} -eq 1 ]; then
                       cp $src/$buildOut/$buildOutContents $out${outDir}/$buildOutContents-$buildOutReversedOrder
                     else
                       cp $src/$buildOut $out${outDir}/$buildOut
                     fi
                   done
-                  
-                  cp -r $src $out${outDir}
                 '';
               };
         };
