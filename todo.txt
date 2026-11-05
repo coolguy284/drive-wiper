@@ -1,4 +1,5 @@
 low prio:
+create custom github release-style flake output
 proper cli arg parsing
 multiple erase steps, each being one of several modes (default is write zeros if nonzero data found for hdd, and ioctl trim for ssd):
   write zeros always
