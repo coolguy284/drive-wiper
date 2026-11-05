@@ -94,8 +94,12 @@
                   mkdir -p $out${outDir}
                   
                   for buildOut in $(ls $src); do
+                    # For reference to update this code: https://www.gnu.org/software/bash/manual/bash.html#Arrays
+                    # (code not from the page its just a useful reference)
                     buildOutContents=($(ls $src/$buildOut))
                     
+                    # For reference to update this code: https://www.gnu.org/software/bash/manual/bash.html#Pattern-Matching
+                    # (code not from the page its just a useful reference)
                     buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
                     
                     if [ ''${#buildOutContents[@]} -eq 1 ]; then
