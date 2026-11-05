@@ -90,6 +90,10 @@
               buildAllPlatformsNativePkgs.stdenv.mkDerivation {
                 inherit name;
                 src = copyJoinOutput;
+                buildPhase = ''
+                  mkdir -p $out${outDir}
+                  cp -r $src $out${outDir}
+                '';
               };
         };
         
