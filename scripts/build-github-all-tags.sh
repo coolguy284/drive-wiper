@@ -1,4 +1,4 @@
-# Creates "build/tags-github-releases/<tag name>/<architecture>" folders containing the compiled Rust program as it was at that git tag.
+# Creates "build/tags-github-releases/<tag name>" folders containing the GitHub release files for the compiled Rust program as it was at those git tags.
 
 set -euo pipefail
 

@@ -1,4 +1,4 @@
-# Creates "build/current-github-release/<tag name>/<architecture>" folders containing the compiled Rust program.
+# Creates a "build/current-github-release" folder folders containing the GitHub release files for the compiled Rust program.
 
 set -euo pipefail
 
