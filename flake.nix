@@ -84,6 +84,14 @@
                   '';
                 }
               );
+          
+          makeGithubReleaseFiles =
+            { name, copyJoinOutput, outDir }:
+              stdenv.mkDerivation {
+                inherit name;
+                src = copyJoinOutput;
+              };
+            
         };
         
         outPkgs = {
@@ -121,36 +129,40 @@
         {
           packages = forAllPlatforms (
             buildSystem:
-              {
-                # "pkgs.symlinkJoin" from https://www.google.com/search?q=nix+combine+multiple+derivations+into+one+big+output
-                build-all-platforms =
-                  if buildSystem == buildAllPlatformsNativeSystem then
-                    customPkgs.copyJoin {
-                      name = "build";
-                      pkgsToCombine = outPkgs;
-                      pkgSubdir = "/bin";
-                      copySymlinkContents = true;
-                    }
-                  else
-                    throw "full cross platform build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
-                
-                build-github-releases =
-                  if buildSystem == buildAllPlatformsNativeSystem then
-                    customPkgs.copyJoin {
-                      name = "build";
-                      pkgsToCombine = outPkgs;
-                      pkgSubdir = "/bin";
-                      copySymlinkContents = true;
-                    }
-                  else
-                    throw "full cross platform github build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
-                
-                default = makeNativeOutPkgs buildSystem {};
-                
-                #test = makeNativeOutPkgs buildSystem {
-                #  buildType = "test";
-                #};
-              }
+              let
+                allPlatformsPackage =
+                  customPkgs.copyJoin {
+                    name = "build";
+                    pkgsToCombine = outPkgs;
+                    pkgSubdir = "/bin";
+                    copySymlinkContents = true;
+                  };
+              
+              in
+                {
+                  # "pkgs.symlinkJoin" from https://www.google.com/search?q=nix+combine+multiple+derivations+into+one+big+output
+                  build-all-platforms =
+                    if buildSystem == buildAllPlatformsNativeSystem then
+                      allPlatformsPackage
+                    else
+                      throw "full cross platform build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
+                  
+                  build-github-releases =
+                    if buildSystem == buildAllPlatformsNativeSystem then
+                      customPkgs.makeGithubReleaseFiles {
+                        name = "build-github";
+                        copyJoinOutput = allPlatformsPackage;
+                        outDir = "/bin";
+                      }
+                    else
+                      throw "full cross platform github build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
+                  
+                  default = makeNativeOutPkgs buildSystem {};
+                  
+                  #test = makeNativeOutPkgs buildSystem {
+                  #  buildType = "test";
+                  #};
+                }
           );
           
           apps = forAllPlatforms (
