@@ -134,6 +134,17 @@
                   else
                     throw "full cross platform build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
                 
+                build-github-releases =
+                  if buildSystem == buildAllPlatformsNativeSystem then
+                    customPkgs.copyJoin {
+                      name = "build";
+                      pkgsToCombine = outPkgs;
+                      pkgSubdir = "/bin";
+                      copySymlinkContents = true;
+                    }
+                  else
+                    throw "full cross platform github build intended for system ${buildAllPlatformsNativeSystem} but this flake output is for system ${buildSystem}";
+                
                 default = makeNativeOutPkgs buildSystem {};
                 
                 #test = makeNativeOutPkgs buildSystem {
