@@ -4,6 +4,6 @@ Unlicense does not legally apply in your jurisdiction.
 Note:
   Parts taken from elsewhere and thus (probably) does not follow the same
   MIT+Unlicense as rest of repo:
-    file "flake.nix", lines 72-87
+    file "flake.nix", contents of variable declaration "env.RUSTFLAGS" (the variable declaration, the equals, and the part after)
     folder "windows-drives"
       There were modifications made to the crate by coolguy284 to add write functionality
