@@ -23,9 +23,9 @@ This GitHub repository is a nix flake. To install the latest release, add the fo
 {
   inputs = {
     ...
-    rust-nix-template.url = "github:coolguy284/rust-nix-template/latest-release";
+    drive-wiper.url = "github:coolguy284/drive-wiper/latest-release";
     # optionally add this as well:
-    rust-nix-template.inputs.nixpkgs.follows = "nixpkgs";
+    drive-wiper.inputs.nixpkgs.follows = "nixpkgs";
   };
   
   # This readme assumes that you are passing flake inputs to the Nix system configuration. Example for a NixOS system shown below (adapted from https://drakerossman.com/blog/how-to-convert-default-nixos-to-nixos-with-flakes):
@@ -57,7 +57,7 @@ Then, add the input to the system packages in any Nix module's configuration lik
 
 {
   environment.systemPackages = with pkgs; [
-    inputs.rust-nix-template.packages.${pkgs.stdenv.hostPlatform.system}
+    inputs.drive-wiper.packages.${pkgs.stdenv.hostPlatform.system}
   ];
 }
 ```
