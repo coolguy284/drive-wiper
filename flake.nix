@@ -68,6 +68,8 @@
                   dontUnpack = true;
                   
                   installPhase = ''
+                    set -euo pipefail
+                    
                     # https://stackoverflow.com/questions/9293887/how-to-read-a-space-delimited-string-into-an-array-in-bash/9294015#9294015
                     folderNamesArr=($folderNames)
                     folderPkgsArr=($folderPkgs)
@@ -94,6 +96,8 @@
                   buildAllPlatformsNativePkgs.zip
                 ];
                 buildPhase = ''
+                  set -euo pipefail
+                  
                   mkdir -p $out
                   
                   for buildOut in $(ls $src); do
@@ -237,6 +241,8 @@
                       #];
                       
                       shellHook = ''
+                        set -euo pipefail
+                        
                         echo "Entering Rust development environment for platform "'"'"${buildSystem}"'"'
                       '';
                     };
