@@ -105,23 +105,19 @@
                     # (code not from the page its just a useful reference)
                     buildOutContents=($(ls $src/$buildOut))
                     
-                    # For reference to update this code: https://www.gnu.org/software/bash/manual/bash.html#Pattern-Matching
-                    # (code not from the page its just a useful reference)
-                    buildOutReversedOrder="''${buildOut/*-/}-''${buildOut/-*/}"
-                    
                     if [ ''${#buildOutContents[@]} -eq 1 ]; then
                       # single file for that build output, rename and copy directly
                       
                       if [ "''${buildOutContents[0]}" != "''${buildOutContents[0]/%.exe/}" ]; then
                         # file ends with .exe so must remove, rename, and read
-                        cp $src/$buildOut/''${buildOutContents[0]} $out/''${buildOutContents[0]/%.exe/}-$buildOutReversedOrder.exe
+                        cp $src/$buildOut/''${buildOutContents[0]} $out/''${buildOutContents[0]/%.exe/}-$buildOut.exe
                       else
                         # file does not end with .exe so can rename directly
-                        cp $src/$buildOut/''${buildOutContents[0]} $out/''${buildOutContents[0]}-$buildOutReversedOrder
+                        cp $src/$buildOut/''${buildOutContents[0]} $out/''${buildOutContents[0]}-$buildOut
                       fi
                     else
                       # many files for that build output, convert to zip
-                      (cd $src/$buildOut; zip -r $out/${cargoFileContents.package.name}-$buildOutReversedOrder.zip .)
+                      (cd $src/$buildOut; zip -r $out/${cargoFileContents.package.name}-$buildOut.zip .)
                     fi
                   done
                 '';
@@ -131,10 +127,10 @@
         outPkgs = {
           # "pkgs.pkgsCross" from https://www.google.com/search?q=rustplatform+buildrustpackage+specify+output+platform
           # "pkgs.pkgsCross.mingwW64" from https://www.google.com/search?q=nixos+pkgscross+rust+x86_64-pc-windows-gnu
-          x86_64-linux = buildAllPlatformsNativePkgs.rustPlatform.buildRustPackage (makeRustPackageParams {});
-          x86-linux = buildAllPlatformsNativePkgs.pkgsCross.gnu32.rustPlatform.buildRustPackage (makeRustPackageParams {});
-          x86_64-windows = buildAllPlatformsNativePkgs.pkgsCross.mingwW64.rustPlatform.buildRustPackage (makeRustPackageParams {});
-          x86-windows = buildAllPlatformsNativePkgs.pkgsCross.mingw32.rustPlatform.buildRustPackage (makeRustPackageParams {
+          linux-x86_64 = buildAllPlatformsNativePkgs.rustPlatform.buildRustPackage (makeRustPackageParams {});
+          linux-x86 = buildAllPlatformsNativePkgs.pkgsCross.gnu32.rustPlatform.buildRustPackage (makeRustPackageParams {});
+          windows-x86_64 = buildAllPlatformsNativePkgs.pkgsCross.mingwW64.rustPlatform.buildRustPackage (makeRustPackageParams {});
+          windows-x86 = buildAllPlatformsNativePkgs.pkgsCross.mingw32.rustPlatform.buildRustPackage (makeRustPackageParams {
             # https://discourse.nixos.org/t/trying-to-cross-compile-to-i686-pc-windows-gnu/76237/18
             env.RUSTFLAGS =
               let
@@ -144,14 +140,14 @@
                 ];
                 searchDirs = map (a: "-L ${a}/lib") dylibs;
               in
-              builtins.concatStringsSep
-              " "
-              (
-                [
-                  "-C" "link-arg=-lmcfgthread"
-                ]
-                ++ searchDirs
-              );
+                builtins.concatStringsSep
+                " "
+                (
+                  [
+                    "-C" "link-arg=-lmcfgthread"
+                  ]
+                  ++ searchDirs
+                );
           });
         };
         
