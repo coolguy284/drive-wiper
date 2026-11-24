@@ -2,6 +2,6 @@
 
 set -euo pipefail
 
-cd "${0%/*}/.."
+repo_root="${0%/*}/.."
 
-nix --extra-experimental-features 'nix-command flakes' run . -- "$@"
+nix --extra-experimental-features 'nix-command flakes' run "$repo_root" -- "$@"

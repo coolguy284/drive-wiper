@@ -126,17 +126,17 @@
         
         outPkgs = {
           # "pkgs.pkgsCross" from https://www.google.com/search?q=rustplatform+buildrustpackage+specify+output+platform
-          # "pkgs.pkgsCross.mingwW64" from https://www.google.com/search?q=nixos+pkgscross+rust+x86_64-pc-windows-gnu
+          # "pkgs.pkgsCross.mingw-msvcrt-x86_64" from https://www.google.com/search?q=nixos+pkgscross+rust+x86_64-pc-windows-gnu
           linux-x86_64 = buildAllPlatformsNativePkgs.rustPlatform.buildRustPackage (makeRustPackageParams {});
           linux-x86 = buildAllPlatformsNativePkgs.pkgsCross.gnu32.rustPlatform.buildRustPackage (makeRustPackageParams {});
-          windows-x86_64 = buildAllPlatformsNativePkgs.pkgsCross.mingwW64.rustPlatform.buildRustPackage (makeRustPackageParams {});
-          windows-x86 = buildAllPlatformsNativePkgs.pkgsCross.mingw32.rustPlatform.buildRustPackage (makeRustPackageParams {
+          windows-x86_64 = buildAllPlatformsNativePkgs.pkgsCross.mingw-msvcrt-x86_64.rustPlatform.buildRustPackage (makeRustPackageParams {});
+          windows-x86 = buildAllPlatformsNativePkgs.pkgsCross.mingw-msvcrt-i686.rustPlatform.buildRustPackage (makeRustPackageParams {
             # https://discourse.nixos.org/t/trying-to-cross-compile-to-i686-pc-windows-gnu/76237/18
             env.RUSTFLAGS =
               let
                 dylibs = [
-                  buildAllPlatformsNativePkgs.pkgsCross.mingw32.windows.pthreads
-                  buildAllPlatformsNativePkgs.pkgsCross.mingw32.windows.mcfgthreads
+                  buildAllPlatformsNativePkgs.pkgsCross.mingw-msvcrt-i686.windows.pthreads
+                  buildAllPlatformsNativePkgs.pkgsCross.mingw-msvcrt-i686.windows.mcfgthreads
                 ];
                 searchDirs = map (a: "-L ${a}/lib") dylibs;
               in
